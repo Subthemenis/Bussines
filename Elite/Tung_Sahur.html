@@ -1,1 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAHUR OS | Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
+        :root {
+            --gold: #ffcc00;
+            --gold-dim: #c29b00;
+            --gold-glow: rgba(255, 204, 0, 0.18);
+            --gold-faint: rgba(255, 204, 0, 0.07);
+            --bg: #060400;
+            --black: #030200;
+            --text: #f0d870;
+            --text-dim: #7a6500;
+            --sidebar-width: 260px;
+        }
+
+        body {
+            margin: 0;
+            background: var(--black);
+            color: var(--text);
+            font-family: 'Share Tech Mono', monospace;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* === GATE === */
+        #gate {
+            position: fixed;
+            inset: 0;
+            background: var(--black);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+
+        #gate::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,204,0,0.03) 40px),
+                repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,204,0,0.03) 40px);
+            pointer-events: none;
+        }
+
+        .gate-eyebrow {
+            font-size: 11px;
+            letter-spacing: 6px;
+            color: var(--gold-dim);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+
+        .gate-logo {
+            width: 140px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 18px var(--gold));
+            animation: breathe 3s infinite ease-in-out;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 18px var(--gold)); }
+            50% { transform: scale(1.06); filter: drop-shadow(0 0 32px var(--gold)); }
+        }
+
+        .gate-title {
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 72px;
+            letter-spacing: 12px;
+            color: #fff;
+            text-transform: uppercase;
+            line-height: 1;
+            margin-bottom: 8px;
+            text-shadow: 0 0 30px rgba(255,204,0,0.9), 0 0 60px rgba(255,204,0,0.4);
+        }
+
+        .gate-subtitle {
+            font-size: 12px;
+            letter-spacing: 5px;
+            color: var(--gold-dim);
+            margin-bottom: 28px;
+            text-transform: uppercase;
+        }
+
+        #entry {
+            background: rgba(255, 204, 0, 0.08);
+            border: 1px solid rgba(255, 204, 0, 0.4);
+            color: #fff;
+            padding: 14px 20px;
+            font-size: 20px;
+            font-family: 'Share Tech Mono', monospace;
+            text-align: center;
+            letter-spacing: 8px;
+            outline: none;
+            width: 320px;
+            border-radius: 3px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.6);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        #entry:focus {
+            background: rgba(255, 204, 0, 0.15);
+            border-color: var(--gold);
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.25), inset 0 0 10px rgba(255, 204, 0, 0.08);
+        }
+
+        #entry::placeholder { color: var(--text-dim); letter-spacing: 4px; }
+
+        /* === LOADING === */
+        #loading-screen {
+            position: absolute;
+            inset: 0;
+            background: var(--black);
+            z-index: 50;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loader-box { width: 300px; text-align: center; }
+
+        .loader-text {
+            font-size: 13px;
+            color: var(--gold);
+            margin-bottom: 15px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .loader-bar-container {
+            width: 100%;
+            height: 3px;
+            background: rgba(255,204,0,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loader-bar-fill {
+            position: absolute;
+            width: 40%;
+            height: 100%;
+            background: var(--gold);
+            box-shadow: 0 0 15px var(--gold);
+            animation: slide 1.5s infinite ease-in-out;
+        }
+
+        @keyframes slide {
+            0% { left: -40%; }
+            100% { left: 100%; }
+        }
+
+        /* === MAIN UI === */
+        #main-ui {
+            display: none;
+            height: 100vh;
+            grid-template-columns: var(--sidebar-width) 1fr;
+            grid-template-rows: 1fr;
+            transition: grid-template-columns 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #main-ui.collapsed {
+            grid-template-columns: 0px 1fr;
+        }
+
+        /* === SIDEBAR === */
+        .sidebar {
+            background: #080600;
+            border-right: 1px solid var(--gold-dim);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 15px;
+            z-index: 10;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.6);
+            overflow-y: auto;
+            overflow-x: hidden;
+            white-space: nowrap;
+            transition: padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), border 0.4s, box-shadow 0.4s;
+        }
+
+        #main-ui.collapsed .sidebar {
+            padding-left: 0;
+            padding-right: 0;
+            border-right-color: transparent;
+            box-shadow: none;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 3px; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+        .nav-brand {
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 22px;
+            letter-spacing: 5px;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: #080600;
+            z-index: 2;
+            text-shadow: 0 0 10px rgba(255,204,0,0.5);
+        }
+
+        .nav-group { margin-bottom: 25px; width: 100%; }
+
+        .nav-label {
+            font-size: 9px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin: 0 0 10px 0;
+        }
+
+        .btn {
+            background: transparent;
+            border: 1px solid rgba(255, 204, 0, 0.25);
+            color: var(--text-dim);
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+            border-radius: 2px;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.15s ease;
+            width: 100%;
+            margin-bottom: 7px;
+            outline: none;
+        }
+
+        .btn:hover {
+            background: var(--gold-glow);
+            border-color: var(--gold);
+            color: var(--gold);
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.15);
+        }
+
+        .btn-util {
+            border-color: rgba(255, 204, 0, 0.4);
+            color: #998800;
+            width: auto;
+            height: 28px;
+            font-size: 10px;
+            padding: 0 12px;
+        }
+
+        /* === VIEWPORT === */
+        #viewport {
+            display: flex;
+            flex-direction: column;
+            background: var(--black);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .view-header {
+            height: 48px;
+            background: rgba(8, 6, 0, 0.95);
+            border-bottom: 1px solid rgba(255, 204, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            font-size: 11px;
+            position: relative;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .header-right { display: flex; align-items: center; }
+
+        .view-footer {
+            height: 30px;
+            background: #080600;
+            border-top: 1px solid var(--gold-dim);
+            display: flex;
+            gap: 20px;
+            padding: 0 20px;
+            align-items: center;
+            font-size: 10px;
+            color: var(--text-dim);
+        }
+
+        .dot-live {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: #ffcc00;
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 8px #ffcc00;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        #content-area {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #000;
+        }
+
+        /* === WELCOME === */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            background:
+                radial-gradient(ellipse 60% 40% at 50% 55%, rgba(255,204,0,0.04) 0%, transparent 70%);
+        }
+
+        .welcome-char {
+            width: 160px;
+            filter: drop-shadow(0 0 24px var(--gold));
+            animation: breathe 3s infinite ease-in-out;
+            margin-bottom: 24px;
+        }
+
+        .welcome-screen h2 {
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 48px;
+            letter-spacing: 10px;
+            color: var(--gold);
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(255,204,0,0.5);
+        }
+
+        .welcome-line {
+            width: 200px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+            margin: 18px auto 24px;
+        }
+
+        .welcome-tag {
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-footer { margin-top: auto; padding-top: 20px; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <!-- GATE -->
+    <div id="gate">
+        <p class="gate-eyebrow">Secure Access Portal</p>
+        <img src="https://assets.nintendo.com/image/upload/ar_16:9,c_lpad,w_1240/b_white/f_auto/q_auto/store/software/switch/70010000098678/3078cbf5b901860b00db096136f51361daa3d873ccdb3f4b346bc4200adf3642" class="gate-logo" alt="Tung Tung Sahur">
+        <h1 class="gate-title">SAHUR OS</h1>
+        <p class="gate-subtitle">v9 // Admin Terminal</p>
+        <input type="text" id="entry" placeholder="TYPE SAHUR" autocomplete="off" spellcheck="false">
+    </div>
+
+    <!-- MAIN UI -->
+    <div id="main-ui">
+        <aside class="sidebar" id="sidebar">
+            <div class="nav-brand">SAHUR_OS</div>
+
+            <div class="nav-group">
+                <p class="nav-label">Core Systems</p>
+                <button class="btn" onclick="goHome()">Dashboard</button>
+                <button class="btn" onclick="loadGames()">Game Modules</button>
+            </div>
+
+            <div class="nav-group">
+                <p class="nav-label">Network Links</p>
+                <button class="btn" onclick="go('https://xylora.on.top.thenookfactory.com//')">Xylora</button>
+                <button class="btn" onclick="go('https://axischurch.ldeazevedo.com//')">Axis</button>
+                <button class="btn" onclick="go('https://larp.zinets.ca/onboarding/')">Cherri</button>
+                <button class="btn" onclick="go('https://calculus.homework.biology.geography.lecture.bigrocktechnologies.com/')">Otonic</button>
+                <button class="btn" onclick="go('https://jaydenmakesstuff.eleomedio-coach.hu/')">Vapor</button>
+                <button class="btn" onclick="go('https://hiandhello4.eleomedio-coach.hu/?/')">Void Network</button>
+                <button class="btn" onclick="go('https://inf41480.hydros.cl/')">Infamous</button>
+                <button class="btn" onclick="go('https://435678.kavellewatches.com/')">Velara</button>
+                <button class="btn" onclick="go('https://lsrelay-l.s3.amazonaws.com/index.html#/g')">Lucide</button>
+                <button class="btn" onclick="go('https://s3.amazonaws.com/ghst/index.html')">Ghost</button>
+                <button class="btn" onclick="go('https://tungtung.avtosnoj.si/')">Tung Tung</button>
+                <button class="btn" onclick="go('https://bomboclat-wallahi.urpalestinian.tokeslaszlo.eu/')">Relic Network</button>
+                <button class="btn" onclick="go('https://d1kdg4gl68lhf1.cloudfront.net/gxmes.html')">EDU Rocks</button>
+                <button class="btn" onclick="go('https://gsyostos9t.ceifjskdj.fwh.is/')">Frogie's Arcade</button>
+                <button class="btn" onclick="go('https://strawberry.avtosnoj.si')">Ford</button>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="nav-group">
+                    <p class="nav-label">Utilities</p>
+                    <button class="btn" onclick="triggerUpload()">Upload File</button>
+                    <input type="file" id="file-input" style="display:none" onchange="handleUpload(event)">
+                </div>
+            </div>
+        </aside>
+
+        <main id="viewport">
+            <header class="view-header">
+                <div class="header-left">
+                    <button class="btn btn-util" onclick="toggleSidebar()">[ Menu ]</button>
+                    <button id="ctx-full-btn" class="btn btn-util">Fullscreen</button>
+                </div>
+
+                <div id="clock" style="position:absolute; left:50%; transform:translateX(-50%); color:var(--gold); font-size:14px; letter-spacing:3px;">00:00:00</div>
+
+                <div class="header-right">
+                    <span class="dot-live"></span>
+                    <span style="color:var(--text-dim); font-size:10px; letter-spacing:2px;">SYSTEM READY</span>
+                </div>
+            </header>
+
+            <div id="content-area">
+                <div id="loading-screen">
+                    <div class="loader-box">
+                        <div class="loader-text">Loading Module...</div>
+                        <div class="loader-bar-container">
+                            <div class="loader-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="welcome-msg" class="welcome-screen">
+                    <img src="https://assets.nintendo.com/image/upload/ar_16:9,c_lpad,w_1240/b_white/f_auto/q_auto/store/software/switch/70010000098678/3078cbf5b901860b00db096136f51361daa3d873ccdb3f4b346bc4200adf3642"
+                         class="welcome-char" alt="Tung Tung Sahur">
+                    <p class="welcome-tag">Node 01 // Established</p>
+                    <h2>SAHUR_OS</h2>
+                    <div class="welcome-line"></div>
+                    <p style="font-size:11px; color:var(--text-dim); letter-spacing:3px;">SELECT A MODULE FROM THE SIDEBAR</p>
+                    <div style="display:flex; gap:10px; margin-top:16px;">
+                        <button class="btn btn-util" onclick="launchPop()">Launch About:Blank</button>
+                        <button class="btn btn-util" onclick="launchBlob()">Launch Blob URL</button>
+                    </div>
+                </div>
+
+                <iframe id="screen" style="display:none;" allowfullscreen></iframe>
+            </div>
+
+            <footer class="view-footer">
+                <div>ENC: AES-256</div>
+                <div>LOC: SAHUR_REMOTE</div>
+                <div style="color:var(--gold);" id="os-status">ID: TUNG-0922</div>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        const entry = document.getElementById('entry');
+        const gate = document.getElementById('gate');
+        const ui = document.getElementById('main-ui');
+        const screen = document.getElementById('screen');
+        const welcome = document.getElementById('welcome-msg');
+        const loading = document.getElementById('loading-screen');
+        const status = document.getElementById('os-status');
+
+        // Gate
+        entry.addEventListener('input', () => {
+            if (entry.value.trim().toLowerCase() === 'tung') {
+                gate.style.opacity = '0';
+                setTimeout(() => {
+                    gate.style.display = 'none';
+                    ui.style.display = 'grid';
+                    ui.classList.add('collapsed');
+                }, 500);
+            }
+        });
+
+        function toggleSidebar() { ui.classList.toggle('collapsed'); }
+        function minimizeSidebar() { ui.classList.add('collapsed'); }
+
+        function showLoading() { loading.style.display = 'flex'; }
+        function hideLoading() { loading.style.display = 'none'; }
+
+        screen.onload = () => hideLoading();
+
+        function goHome() {
+            showLoading();
+            setTimeout(() => {
+                screen.style.display = 'none';
+                screen.src = 'about:blank';
+                welcome.style.display = 'flex';
+                ui.classList.remove('collapsed');
+                hideLoading();
+                status.innerText = 'ID: TUNG-0922';
+            }, 600);
+        }
+
+        function go(url) {
+            showLoading();
+            welcome.style.display = 'none';
+            screen.style.display = 'block';
+            screen.src = url;
+            minimizeSidebar();
+            status.innerText = 'ACTIVE: ' + url;
+        }
+
+        function destroyFrame() {
+            const oldFrame = document.getElementById('screen');
+            if (oldFrame) oldFrame.remove();
+            const newFrame = document.createElement('iframe');
+            newFrame.id = 'screen';
+            newFrame.style.display = 'none';
+            newFrame.allowFullscreen = true;
+            newFrame.onload = () => hideLoading();
+            document.getElementById('content-area').appendChild(newFrame);
+            welcome.style.display = 'flex';
+            status.innerText = 'VIEWPORT CLEARED';
+        }
+
+        function loadGames() {
+            showLoading();
+            welcome.style.display = 'none';
+            screen.style.display = 'block';
+            minimizeSidebar();
+            fetch('https://raw.githubusercontent.com/subthemenis/Games/master/index.html')
+                .then(res => res.text())
+                .then(html => {
+                    screen.srcdoc = html;
+                    setTimeout(hideLoading, 800);
+                    status.innerText = 'ACTIVE: GAME MODULES';
+                })
+                .catch(() => {
+                    screen.srcdoc = '<div style="color:#ffcc00;text-align:center;margin-top:20%;font-family:monospace;">LOAD ERROR</div>';
+                    hideLoading();
+                });
+        }
+
+        function triggerUpload() { document.getElementById('file-input').click(); }
+
+        function handleUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                go(URL.createObjectURL(file));
+                status.innerText = 'LOCAL FILE: ' + file.name;
+            }
+        }
+
+        function popAndClear() {
+            const s = document.getElementById('screen');
+            if (s.src && s.src !== 'about:blank') {
+                window.open(s.src, '_blank');
+                destroyFrame();
+            }
+        }
+
+        function launchPop() {
+            const win = window.open('about:blank', '_blank');
+            if (win) {
+                win.document.write('<!DOCTYPE html>' + document.documentElement.outerHTML);
+                window.location.replace('https://google.com');
+            }
+        }
+
+        function launchBlob() {
+            const blob = new Blob(['<!DOCTYPE html>' + document.documentElement.outerHTML], { type: 'text/html' });
+            window.open(URL.createObjectURL(blob), '_blank');
+            window.location.replace('https://google.com');
+        }
+
+        document.getElementById('ctx-full-btn').addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent =
+                now.getHours().toString().padStart(2,'0') + ':' +
+                now.getMinutes().toString().padStart(2,'0') + ':' +
+                now.getSeconds().toString().padStart(2,'0');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>
