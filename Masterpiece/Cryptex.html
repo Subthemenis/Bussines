@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cryptex | Command Center</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --blue:#00aaff;
+    --blue-dim:#0077cc;
+    --blue-glow:rgba(0,170,255,.18);
+    --bg-black:#000508;
+    --navy:#000d1a;
+    --text:#a8d8f0;
+    --text-dim:#4a7a9b;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:var(--bg-black);
+    color:var(--text);
+    font-family:'Rajdhani',sans-serif;
+}
+
+/* ---------- GATE ---------- */
+
+#gate{
+    position:fixed;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background:var(--bg-black);
+    z-index:2000;
+    transition:.5s;
+}
+
+.gate-title{
+    font-size:88px;
+    letter-spacing:20px;
+    color:white;
+    text-shadow:
+    0 0 30px rgba(0,170,255,.8),
+    0 0 60px rgba(0,170,255,.3);
+}
+
+.gate-eyebrow{
+    font-size:12px;
+    letter-spacing:6px;
+    margin-bottom:15px;
+    color:#5bb8e8;
+    font-family:'Share Tech Mono';
+}
+
+#entry{
+    margin-top:25px;
+    width:320px;
+    padding:14px;
+    border-radius:8px;
+    background:rgba(0,170,255,.12);
+    border:1px solid rgba(0,170,255,.4);
+    color:white;
+    outline:none;
+    font-size:20px;
+    text-align:center;
+    font-family:'Share Tech Mono';
+    letter-spacing:6px;
+}
+
+#entry:focus{
+    border-color:var(--blue);
+    box-shadow:0 0 18px rgba(0,170,255,.25);
+}
+
+/* ---------- MAIN ---------- */
+
+#main-ui{
+    display:none;
+    flex-direction:column;
+    height:100vh;
+}
+
+nav{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px;
+    background:#000810;
+    border-bottom:1px solid var(--blue-dim);
+}
+
+.header-brand{
+    color:var(--blue);
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:5px;
+    text-transform:uppercase;
+    flex-shrink:0;
+}
+
+/* ---------- SCROLL ---------- */
+
+.nav-scroll{
+    display:flex;
+    gap:10px;
+    overflow-x:auto;
+    flex:1;
+    cursor:grab;
+    padding:2px;
+    scroll-behavior:smooth;
+}
+
+.nav-scroll::-webkit-scrollbar{
+    height:4px;
+}
+
+.nav-scroll::-webkit-scrollbar-thumb{
+    background:var(--blue-dim);
+}
+
+/* ---------- SITE BUTTONS ---------- */
+
+.nav-link{
+    min-height:40px;
+    padding:0 18px;
+    border-radius:10px;
+    border:1px solid rgba(0,170,255,.15);
+    background:rgba(0,170,255,.04);
+    color:var(--text-dim);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    white-space:nowrap;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.nav-link:hover{
+    transform:translateY(-2px);
+    color:var(--blue);
+    border-color:var(--blue);
+    background:linear-gradient(
+    rgba(0,170,255,.16),
+    rgba(0,170,255,.05));
+    box-shadow:0 0 12px rgba(0,170,255,.2);
+}
+
+.nav-link:active{
+    transform:scale(.96);
+}
+
+/* ---------- TOOL BUTTONS ---------- */
+
+.controls{
+    display:flex;
+    gap:8px;
+}
+
+.tool-btn{
+    min-width:110px;
+    height:40px;
+    border-radius:10px;
+    border:1px solid rgba(0,170,255,.25);
+    background:linear-gradient(
+    rgba(0,20,40,.9),
+    rgba(0,10,20,.9));
+    color:var(--text);
+    font-family:'Share Tech Mono';
+    font-size:11px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.tool-btn:hover{
+    transform:translateY(-2px);
+    border-color:var(--blue);
+    box-shadow:0 0 14px rgba(0,170,255,.2);
+}
+
+.tool-btn:active{
+    transform:scale(.96);
+}
+
+.danger{
+    color:#ff7676;
+    border-color:rgba(255,80,80,.25);
+}
+
+.danger:hover{
+    border-color:#ff4444;
+    box-shadow:0 0 14px rgba(255,0,0,.2);
+}
+
+/* ---------- VIEWPORT ---------- */
+
+#viewport{
+    position:relative;
+    flex:1;
+    overflow:hidden;
+}
+
+.os-frame{
+    width:100%;
+    height:100%;
+    border:none;
+}
+
+#bg-char{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:12px;
+    color:var(--text-dim);
+}
+
+#bg-char h2{
+    font-size:55px;
+    color:var(--blue);
+    letter-spacing:10px;
+}
+
+.welcome-line{
+    width:220px;
+    height:1px;
+    background:linear-gradient(
+    90deg,
+    transparent,
+    var(--blue),
+    transparent);
+}
+
+#file-input{
+    display:none;
+}
+</style>
+</head>
+<body>
+
+<div id="gate">
+<p class="gate-eyebrow">Secure Access Portal</p>
+<h1 class="gate-title">Cryptex</h1>
+
+<input
+id="entry"
+placeholder="ENTER PASSCODE"
+autocomplete="off">
+</div>
+
+<div id="main-ui">
+
+<nav id="nav-bar">
+
+<div class="header-brand">
+Cryptex
+</div>
+
+<div class="nav-scroll">
+
+<button class="nav-link" onclick="go('https://xylora.on.top.thenookfactory.com//')">Xylora</button>
+<button class="nav-link">Axis</button>
+<button class="nav-link">Cherri</button>
+<button class="nav-link">Otonic</button>
+<button class="nav-link">Vapor</button>
+<button class="nav-link">Void Network</button>
+<button class="nav-link">Infamous</button>
+<button class="nav-link">Velara</button>
+<button class="nav-link">Lucid</button>
+<button class="nav-link">Ghost</button>
+<button class="nav-link">Tung Tung</button>
+<button class="nav-link">Relic Network</button>
+<button class="nav-link">EDU Rocks</button>
+<button class="nav-link">Noah's butthole</button>
+<button class="nav-link">Frogie's arcade</button>
+<button class="nav-link">Ford</button>
+
+</div>
+
+<div class="controls">
+
+<input type="file" id="file-input" onchange="handleUpload(event)">
+
+<button class="tool-btn" onclick="triggerUpload()">UPLOAD</button>
+<button class="tool-btn" onclick="toggleFS()">FULLSCREEN</button>
+<button class="tool-btn" onclick="popAndClear()">POP-OUT</button>
+<button class="tool-btn danger" onclick="destroyFrame()">CLOSE</button>
+
+</div>
+
+</nav>
+
+<div id="viewport">
+
+<div id="bg-char">
+<h2>Terminal</h2>
+<div class="welcome-line"></div>
+<span>NODE 01 // SYSTEM READY</span>
+</div>
+
+<iframe id="screen" class="os-frame" src="about:blank"></iframe>
+
+</div>
+</div>
+
+<script>
+
+const entry=document.getElementById("entry");
+const gate=document.getElementById("gate");
+const ui=document.getElementById("main-ui");
+const bg=document.getElementById("bg-char");
+const screen=document.getElementById("screen");
+
+entry.addEventListener("input",()=>{
+
+if(entry.value==="Cryptex123"){
+
+gate.style.opacity="0";
+
+setTimeout(()=>{
+
+gate.style.display="none";
+ui.style.display="flex";
+
+},500);
+
+}
+
+});
+
+function go(url){
+screen.src=url;
+bg.style.display="none";
+}
+
+function triggerUpload(){
+document.getElementById("file-input").click();
+}
+
+function handleUpload(e){
+
+const file=e.target.files[0];
+
+if(file){
+go(URL.createObjectURL(file));
+}
+
+}
+
+function destroyFrame(){
+screen.src="about:blank";
+bg.style.display="flex";
+}
+
+function popAndClear(){
+
+let src=screen.src;
+
+if(src!=="about:blank"){
+
+window.open(src,"_blank");
+
+destroyFrame();
+
+}
+
+}
+
+function toggleFS(){
+
+if(!document.fullscreenElement){
+document.documentElement.requestFullscreen();
+}else{
+document.exitFullscreen();
+}
+
+}
+
+/* NAV SCROLL */
+
+const nav=document.querySelector(".nav-scroll");
+
+let down=false;
+let startX;
+let scrollLeft;
+
+nav.addEventListener("mousedown",e=>{
+
+down=true;
+
+nav.style.cursor="grabbing";
+
+startX=e.pageX-nav.offsetLeft;
+
+scrollLeft=nav.scrollLeft;
+
+});
+
+window.addEventListener("mouseup",()=>{
+
+down=false;
+
+nav.style.cursor="grab";
+
+});
+
+nav.addEventListener("mouseleave",()=>{
+
+down=false;
+
+nav.style.cursor="grab";
+
+});
+
+nav.addEventListener("mousemove",e=>{
+
+if(!down)return;
+
+e.preventDefault();
+
+const x=e.pageX-nav.offsetLeft;
+
+const walk=(x-startX)*1.5;
+
+nav.scrollLeft=scrollLeft-walk;
+
+});
+
+/* mouse wheel support */
+
+nav.addEventListener("wheel",e=>{
+
+e.preventDefault();
+
+nav.scrollLeft+=e.deltaY;
+
+},{passive:false});
+
+</script>
+
+</body>
+</html>
