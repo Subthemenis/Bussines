@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pepsi | Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* === SYSTEM CORE === */
+        *, *::before, *::after { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+
+        :root {
+            --pepsi-blue: #005cb4;
+            --pepsi-red: #e31b23;
+            --pepsi-dark: #001c3d;
+            --black: #000814;
+            --text: #ffffff;
+            --text-dim: #8bbce8;
+            --sidebar-width: 250px;
+            --glow-blue: rgba(0, 92, 180, 0.3);
+            --glow-red: rgba(227, 27, 35, 0.45);
+        }
+
+        body {
+            margin: 0;
+            background: var(--black);
+            color: var(--text);
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* === GATE (Passcode Screen) === */
+        #gate {
+            position: fixed;
+            inset: 0;
+            background: url('https://raw.githubusercontent.com/Subthemenis/Images/refs/heads/main/Pepsi.png') no-repeat center center / cover;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+
+        #gate::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(0, 8, 20, 0.6)),
+                repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.01) 40px);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .gate-panel {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 55px 65px;
+            background: rgba(0, 8, 20, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 28px;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(0, 92, 180, 0.25),
+                inset 0 0 30px rgba(255, 255, 255, 0.02);
+        }
+
+        .gate-title {
+            font-size: 96px;
+            font-weight: 700;
+            letter-spacing: 16px;
+            color: #fff;
+            text-transform: uppercase;
+            line-height: 1;
+            margin-bottom: 12px;
+            text-shadow:
+                0 4px 10px rgba(0, 0, 0, 0.8),
+                0 0 25px var(--pepsi-blue), 
+                0 0 50px var(--pepsi-red);
+        }
+
+        .gate-eyebrow {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            letter-spacing: 6px;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+
+        #entry {
+            background: #001226;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #fff;
+            padding: 14px 20px;
+            font-size: 22px;
+            font-family: 'Share Tech Mono', monospace;
+            text-align: center;
+            letter-spacing: 8px;
+            outline: none;
+            width: 320px;
+            border-radius: 4px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        #entry:focus {
+            background: #001c3d;
+            border-color: var(--pepsi-red);
+            box-shadow: 0 0 25px var(--pepsi-red), inset 0 0 10px rgba(227, 27, 35, 0.5);
+        }
+
+        /* === LOADING INTERFACE === */
+        #loading-screen {
+            position: absolute;
+            inset: 0;
+            background: var(--black);
+            z-index: 50;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loader-box {
+            width: 300px;
+            text-align: center;
+        }
+
+        .loader-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            color: var(--pepsi-blue);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .loader-bar-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loader-bar-fill {
+            position: absolute;
+            width: 40%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--pepsi-blue), var(--pepsi-red));
+            box-shadow: 0 0 15px var(--pepsi-blue);
+            animation: slide 1.5s infinite ease-in-out;
+        }
+
+        @keyframes slide {
+            0% { left: -40%; }
+            100% { left: 100%; }
+        }
+
+        /* === MAIN UI LAYOUT === */
+        #main-ui {
+            display: none; 
+            height: 100vh;
+            grid-template-columns: var(--sidebar-width) 1fr;
+            grid-template-rows: 1fr;
+            transition: grid-template-columns 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #main-ui.collapsed {
+            grid-template-columns: 0px 1fr;
+        }
+
+        /* === SIDEBAR === */
+        .sidebar {
+            background: var(--pepsi-dark);
+            border-right: 2px solid var(--pepsi-blue);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 15px;
+            z-index: 10;
+            box-shadow: 5px 0 25px rgba(0,0,0,0.6);
+            overflow-y: auto;
+            overflow-x: hidden;
+            white-space: nowrap;
+            transition: padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), border 0.4s, box-shadow 0.4s;
+        }
+
+        #main-ui.collapsed .sidebar {
+            padding-left: 0;
+            padding-right: 0;
+            border-right-color: transparent;
+            box-shadow: none;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--pepsi-blue); border-radius: 2px; }
+
+        .nav-brand {
+            font-weight: 700;
+            font-size: 28px;
+            letter-spacing: 4px;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            position: sticky;
+            top: 0;
+            background: var(--pepsi-dark);
+            z-index: 2;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .nav-group { margin-bottom: 25px; width: 100%; }
+
+        .nav-label {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0 0 12px 0;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        /* All Standard Buttons */
+        .btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            height: 40px;
+            display: flex; 
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-bottom: 8px;
+            outline: none;
+        }
+
+        /* Force Red Highlight on All Standard Button Hovers */
+        .btn:hover {
+            background: var(--pepsi-red);
+            border-color: #fff;
+            color: #fff;
+            box-shadow: 0 0 15px var(--glow-red);
+        }
+
+        /* Utility Header Buttons */
+        .btn-util {
+            border-color: rgba(255, 255, 255, 0.25);
+            color: #fff;
+            width: auto;
+            height: 32px;
+            font-size: 11px;
+            padding: 0 14px;
+            background: rgba(0, 92, 180, 0.2);
+        }
+
+        /* Force Red Highlight on Utility Button Hovers */
+        .btn-util:hover {
+            background: var(--pepsi-red);
+            border-color: #fff;
+            box-shadow: 0 0 15px var(--glow-red);
+        }
+
+        /* === VIEWPORT === */
+        #viewport {
+            display: flex;
+            flex-direction: column;
+            background: var(--black);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .view-header {
+            height: 54px;
+            background: rgba(0, 11, 20, 0.95);
+            border-bottom: 2px solid var(--pepsi-blue);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            position: relative; 
+        }
+
+        /* Adjusted left & right containers to share size to keep center calculations perfectly consistent */
+        .header-left { display: flex; align-items: center; gap: 10px; flex: 1; }
+        .header-right { display: flex; align-items: center; justify-content: flex-end; flex: 1; }
+        
+        /* Fixed: Dropped position absolute so flexbox cleanly updates positioning inside viewport boundaries */
+        .current-time {
+            color: #fff;
+            font-weight: bold;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .view-footer {
+            height: 36px;
+            background: var(--pepsi-dark);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            gap: 20px;
+            padding: 0 20px;
+            align-items: center;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .dot-live {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            background: var(--pepsi-red);
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 10px var(--pepsi-red);
+        }
+
+        #content-area {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #000;
+        }
+
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            background: radial-gradient(circle at center, rgba(0, 92, 180, 0.15) 0%, transparent 70%);
+        }
+
+        .welcome-screen h2 {
+            font-size: 72px;
+            letter-spacing: 12px;
+            color: #fff;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(0, 92, 180, 0.4);
+        }
+
+        .welcome-line {
+            width: 280px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--pepsi-blue), var(--pepsi-red), transparent);
+            margin: 20px auto 28px;
+        }
+
+        .welcome-actions" { display:flex; gap:10px; }
+        .sidebar-footer { margin-top: auto; padding-top: 20px; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div id="gate">
+        <div class="gate-panel">
+            <p class="gate-eyebrow">Global Network Portal</p>
+            <h1 class="gate-title">Pepsi</h1>
+            <input type="text" id="entry" placeholder="ENTER PASSCODE" autocomplete="off" spellcheck="false">
+        </div>
+    </div>
+
+    <div id="main-ui">
+        <aside class="sidebar" id="sidebar">
+            <div class="nav-brand">Pepsi</div>
+            
+            <div class="nav-group">
+                <p class="nav-label">Core Systems</p>
+                <button class="btn" onclick="goHome()">Dashboard</button>
+                <button class="btn" onclick="loadGames()">Game Modules</button>
+            </div>
+
+            <div class="nav-group">
+                <p class="nav-label">External Links</p>
+                <button class="btn" onclick="go('https://xylora.on.top.thenookfactory.com//')">Xylora</button>
+                <button class="btn" onclick="go('https://axischurch.ldeazevedo.com//')">Axis</button>
+                <button class="btn" onclick="go('https://larp.zinets.ca/onboarding/')">Cherri</button>
+                <button class="btn" onclick="go('https://calculus.homework.biology.geography.lecture.bigrocktechnologies.com/')">Otonic</button>
+                <button class="btn" onclick="go('https://jaydenmakesstuff.eleomedio-coach.hu/')">Vapor</button>
+                <button class="btn" onclick="go('https://hiandhello4.eleomedio-coach.hu/?/')">Void Network</button>
+                <button class="btn" onclick="go('https://inf41480.hydros.cl/')">Infamous</button>
+                <button class="btn" onclick="go('https://435678.kavellewatches.com/')">Velara</button>
+                <button class="btn" onclick="go('https://lsrelay-l.s3.amazonaws.com/index.html#/g')">Lucide</button>
+                <button class="btn" onclick="go('https://s3.amazonaws.com/ghst/index.html')">Ghost</button>
+                <button class="btn" onclick="go('https://tungtung.avtosnoj.si/')">Tung Tung</button>
+                <button class="btn" onclick="go('https://bomboclat-wallahi.urpalestinian.tokeslaszlo.eu/')">Relic Network</button>
+                <button class="btn" onclick="go('https://d1kdg4gl68lhf1.cloudfront.net/gxmes.html')">EDU Rocks</button>
+                <button class="btn" onclick="go('https://gsyostos9t.ceifjskdj.fwh.is/')">Frogie's Arcade</button>
+                <button class="btn" onclick="go('https://strawberry.avtosnoj.si')">Ford</button>
+            </div>
+
+            <div class="sidebar-footer"></div>
+        </aside>
+
+        <main id="viewport">
+            <header class="view-header">
+                <div class="header-left">
+                  <button class="btn btn-util" onclick="toggleSidebar()">[ Menu ]</button>
+                  <button id="ctx-full-btn" class="btn btn-util">Fullscreen</button>
+
+                  <button class="btn btn-util" onclick="popoutAB()">
+                    Popout: AB
+                  </button>
+
+                  <button class="btn btn-util" onclick="popoutBlob()">
+                    Popout: Blob
+                  </button>
+                </div>
+
+                <div class="current-time" id="clock">00:00:00</div>
+
+                <div class="header-right">
+                    <div class="status-indicator"><span class="dot-live"></span> Hub: Connected</div>
+                </div>
+            </header>
+
+            <div id="content-area">
+                <div id="loading-screen">
+                    <div class="loader-box">
+                        <div class="loader-text">Syncing Brand Network...</div>
+                        <div class="loader-bar-container">
+                            <div class="loader-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="welcome-msg" class="welcome-screen">
+                    <p class="welcome-tag" style="font-family: 'Share Tech Mono', monospace; color: var(--text-dim); letter-spacing: 3px;">HQ // Operational Node</p>
+                    <h2>Pepsi</h2>
+                    <div class="welcome-line"></div>
+                    <div class="welcome-actions" style="display:flex; gap:10px;">
+                        <button class="btn btn-util" onclick="launchPop()">Launch about:blank</button>
+                        <button class="btn btn-util" onclick="launchBlob()">Launch Blob URL</button>
+                    </div>
+                </div>
+                <iframe id="screen" style="display:none;" allowfullscreen></iframe>
+            </div>
+
+            <footer class="view-footer">
+                <div class="footer-item">SYS: ACTIVE</div>
+                <div class="footer-item">REGION: GLOBAL_SRV</div>
+                <div class="footer-item" style="color: var(--text-dim);">ID: PEP-2026</div>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        const entry = document.getElementById('entry');
+        const gate = document.getElementById('gate');
+        const ui = document.getElementById('main-ui');
+        const screen = document.getElementById('screen');
+        const welcome = document.getElementById('welcome-msg');
+        const loading = document.getElementById('loading-screen');
+
+        // Passcode Logic
+        entry.addEventListener('input', () => {
+            if (entry.value === 'Pepsi123') {
+                gate.style.opacity = '0';
+                setTimeout(() => {
+                    gate.style.display = 'none';
+                    ui.style.display = 'grid';
+                    ui.classList.add('collapsed');
+                }, 500);
+            }
+        });
+
+        // Sidebar Logic
+        function toggleSidebar() {
+            ui.classList.toggle('collapsed');
+        }
+
+        // Loading Controller
+        function showLoading() {
+            loading.style.display = 'flex';
+        }
+
+        // Navigation
+        function goHome() {
+            showLoading();
+            setTimeout(() => {
+                screen.style.display = 'none';
+                screen.removeAttribute('srcdoc'); 
+                screen.src = 'about:blank';
+                welcome.style.display = 'flex';
+                ui.classList.remove('collapsed'); 
+                loading.style.display = 'none';
+            }, 600);
+        }
+
+        function go(url) {
+            showLoading();
+            welcome.style.display = 'none';
+            screen.style.display = 'block';
+            screen.removeAttribute('srcdoc'); 
+            screen.src = url;
+            ui.classList.add('collapsed');
+        }
+
+        function loadGames() {
+            showLoading();
+            welcome.style.display = 'none';
+            screen.style.display = 'block';
+            ui.classList.add('collapsed');
+            
+            fetch('https://raw.githubusercontent.com/subthemenis/Games/master/index.html')
+                .then(res => {
+                    if (!res.ok) throw new Error();
+                    return res.text();
+                })
+                .then(html => { 
+                    screen.srcdoc = html;
+                    setTimeout(() => { loading.style.display = 'none'; }, 400); 
+                })
+                .catch(() => { 
+                    screen.srcdoc = `
+                        <div style="color: #e31b23; background: #000814; font-family: 'Share Tech Mono', monospace; text-align: center; padding-top: 20%; height: 100vh;">
+                            [ ERROR: UNABLE TO RETRIEVE REPOSITORY MODULES ]
+                        </div>`; 
+                    setTimeout(() => { loading.style.display = 'none'; }, 400);
+                });
+        }
+
+        // Utilities
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = 
+                now.getHours().toString().padStart(2, '0') + ':' +
+                now.getMinutes().toString().padStart(2, '0') + ':' +
+                now.getSeconds().toString().padStart(2, '0');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function launchPop() {
+            const win = window.open('about:blank', '_blank');
+            if (win) {
+                win.document.write('<!DOCTYPE html>' + document.documentElement.outerHTML);
+                win.document.close();
+                window.location.replace('https://google.com');
+            }
+        }
+
+        function launchBlob() {
+            const blob = new Blob(['<!DOCTYPE html>' + document.documentElement.outerHTML], { type: 'text/html' });
+            window.open(URL.createObjectURL(blob), '_blank');
+            window.location.replace('https://google.com');
+        }
+
+        function getCurrentContent() {
+            if (screen.srcdoc && screen.srcdoc.trim() !== "") {
+                return screen.srcdoc;
+            }
+
+            if (screen.src && screen.src !== "about:blank") {
+                return `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                <style>
+                html,body{
+                    margin:0;
+                    width:100%;
+                    height:100%;
+                    overflow:hidden;
+                }
+                iframe{
+                    width:100%;
+                    height:100%;
+                    border:none;
+                }
+                </style>
+                </head>
+                <body>
+                    <iframe src="${screen.src}" allowfullscreen></iframe>
+                </body>
+                </html>`;
+            }
+
+            return `
+            <div style="
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:black;
+            color:white;
+            font-family:sans-serif;">
+            No content loaded
+            </div>`;
+        }
+
+        function popoutAB() {
+            const content = getCurrentContent();
+            const win = window.open("about:blank", "_blank");
+            if(win){
+                win.document.open();
+                win.document.write(content);
+                win.document.close();
+            }
+        }
+
+        function popoutBlob() {
+            const content = getCurrentContent();
+            const blob = new Blob([content], {type:"text/html"});
+            const url = URL.createObjectURL(blob);
+            window.open(url,"_blank");
+        }
+
+        document.getElementById('ctx-full-btn').addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error enabling fullscreen: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+    </script>
+</body>
+</html>
