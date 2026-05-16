@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cybertech | Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --neon: #00ffe7;
+  --neon-hot: #ff2d78;
+  --neon-gold: #ffb800;
+  --neon-dim: rgba(0,255,231,.18);
+  --bg: #020b12;
+  --panel: #030f1a;
+  --border: rgba(0,255,231,.2);
+  --text: #9ef7ee;
+  --text-dim: #3a7a80;
+  --grid: rgba(0,255,231,.04);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+@keyframes scanline {
+  0%{transform:translateY(-100%);}
+  100%{transform:translateY(100vh);}
+}
+@keyframes flicker{
+  0%,100%{opacity:1;}
+  92%{opacity:1;}
+  93%{opacity:.85;}
+  94%{opacity:1;}
+  96%{opacity:.9;}
+  97%{opacity:1;}
+}
+@keyframes glitch{
+  0%,95%,100%{clip-path:none;transform:none;}
+  96%{clip-path:polygon(0 20%,100% 20%,100% 25%,0 25%);transform:translate(-4px,0);}
+  97%{clip-path:polygon(0 60%,100% 60%,100% 63%,0 63%);transform:translate(4px,0);}
+  98%{clip-path:polygon(0 40%,100% 40%,100% 44%,0 44%);transform:translate(-2px,0);}
+  99%{clip-path:none;transform:translate(2px,0);}
+}
+@keyframes pulse-border{
+  0%,100%{box-shadow:0 0 8px rgba(0,255,231,.2),inset 0 0 8px rgba(0,255,231,.05);}
+  50%{box-shadow:0 0 22px rgba(0,255,231,.45),inset 0 0 14px rgba(0,255,231,.1);}
+}
+@keyframes boot-in{
+  0%{opacity:0;transform:scale(1.06);}
+  100%{opacity:1;transform:scale(1);}
+}
+@keyframes slide-down{
+  0%{opacity:0;transform:translateY(-24px);}
+  100%{opacity:1;transform:translateY(0);}
+}
+@keyframes type-in{
+  from{width:0;}
+  to{width:100%;}
+}
+@keyframes blink{
+  0%,100%{opacity:1;}50%{opacity:0;}
+}
+@keyframes corner-spin{
+  from{transform:rotate(0deg);}
+  to{transform:rotate(360deg);}
+}
+@keyframes data-flow{
+  0%{background-position:0 0;}
+  100%{background-position:0 -200px;}
+}
+@keyframes hex-drift{
+  0%{transform:translateY(0) rotate(0deg);opacity:.06;}
+  100%{transform:translateY(-120px) rotate(45deg);opacity:0;}
+}
+@keyframes gate-halo{
+  0%,100%{text-shadow:0 0 20px rgba(0,255,231,.5),0 0 60px rgba(0,255,231,.2);}
+  50%{text-shadow:0 0 40px rgba(0,255,231,.9),0 0 100px rgba(0,255,231,.4),0 0 160px rgba(0,255,231,.1);}
+}
+@keyframes sweep {
+  0%{left:-100%;}100%{left:200%;}
+}
+
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;animation:flicker 8s infinite;}
+
+/* ── GRID BACKGROUND ── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ── SCANLINE ── */
+body::after{
+  content:'';
+  position:fixed;
+  left:0;top:0;
+  width:100%;height:3px;
+  background:linear-gradient(transparent,rgba(0,255,231,.06),transparent);
+  animation:scanline 6s linear infinite;
+  pointer-events:none;
+  z-index:9999;
+}
+
+/* ════════════════ GATE ════════════════ */
+#gate{
+  position:fixed;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--bg);
+  z-index:2000;
+  transition:opacity .6s;
+}
+
+.gate-hex-bg{
+  position:absolute;inset:0;overflow:hidden;pointer-events:none;
+}
+.gate-hex-bg span{
+  position:absolute;bottom:0;
+  width:60px;height:60px;
+  border:1px solid rgba(0,255,231,.12);
+  transform:rotate(45deg);
+  animation:hex-drift 6s linear infinite;
+}
+.gate-hex-bg span:nth-child(1){left:10%;animation-duration:7s;width:40px;height:40px;}
+.gate-hex-bg span:nth-child(2){left:25%;animation-duration:9s;animation-delay:1s;width:70px;height:70px;}
+.gate-hex-bg span:nth-child(3){left:45%;animation-duration:6s;animation-delay:2s;}
+.gate-hex-bg span:nth-child(4){left:65%;animation-duration:8s;animation-delay:.5s;width:50px;height:50px;}
+.gate-hex-bg span:nth-child(5){left:80%;animation-duration:7.5s;animation-delay:3s;width:90px;height:90px;}
+.gate-hex-bg span:nth-child(6){left:5%;animation-duration:10s;animation-delay:4s;width:30px;height:30px;}
+
+.gate-corner{
+  position:absolute;
+  width:60px;height:60px;
+}
+.gate-corner::before,.gate-corner::after{
+  content:'';position:absolute;background:var(--neon);
+}
+.gate-corner::before{width:100%;height:2px;top:0;left:0;}
+.gate-corner::after{width:2px;height:100%;top:0;left:0;}
+.gate-corner.tr{top:24px;right:24px;transform:rotate(90deg);}
+.gate-corner.tl{top:24px;left:24px;}
+.gate-corner.br{bottom:24px;right:24px;transform:rotate(180deg);}
+.gate-corner.bl{bottom:24px;left:24px;transform:rotate(270deg);}
+
+.gate-eyebrow{
+  font-family:'Share Tech Mono';
+  font-size:11px;letter-spacing:8px;
+  color:var(--neon);opacity:.7;
+  margin-bottom:18px;
+}
+
+.gate-title{
+  font-family:'Orbitron',sans-serif;
+  font-weight:900;
+  font-size:96px;
+  letter-spacing:16px;
+  color:#fff;
+  animation:gate-halo 3s ease-in-out infinite, glitch 10s steps(1) infinite;
+  position:relative;
+}
+.gate-title::after{
+  content:'CYBERTECH';
+  position:absolute;left:0;top:0;
+  color:var(--neon-hot);
+  clip-path:polygon(0 40%,100% 40%,100% 55%,0 55%);
+  transform:translate(-3px,0);
+  opacity:0;
+  animation:glitch 10s steps(1) infinite;
+}
+
+.gate-subtitle{
+  font-family:'Share Tech Mono';
+  font-size:12px;letter-spacing:4px;
+  color:var(--text-dim);
+  margin-top:8px;margin-bottom:36px;
+}
+
+.gate-input-wrap{
+  position:relative;
+  width:340px;
+}
+.gate-input-wrap::before{
+  content:'';
+  position:absolute;bottom:-2px;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--neon),transparent);
+  animation:pulse-border 2s ease-in-out infinite;
+}
+
+#entry{
+  width:100%;
+  padding:16px 20px;
+  background:rgba(0,255,231,.05);
+  border:1px solid rgba(0,255,231,.3);
+  border-radius:4px;
+  color:#fff;
+  font-family:'Share Tech Mono';
+  font-size:18px;
+  letter-spacing:8px;
+  text-align:center;
+  outline:none;
+  transition:.3s;
+}
+#entry::placeholder{color:var(--text-dim);letter-spacing:4px;font-size:13px;}
+#entry:focus{
+  border-color:var(--neon);
+  background:rgba(0,255,231,.09);
+  box-shadow:0 0 30px rgba(0,255,231,.2),inset 0 0 20px rgba(0,255,231,.05);
+}
+
+.gate-status{
+  margin-top:20px;
+  font-family:'Share Tech Mono';
+  font-size:11px;
+  letter-spacing:3px;
+  color:var(--text-dim);
+  display:flex;align-items:center;gap:8px;
+}
+.status-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--neon);
+  animation:blink 1.2s ease-in-out infinite;
+}
+
+/* ════════════════ MAIN UI ════════════════ */
+#main-ui{
+  display:none;
+  flex-direction:column;
+  height:100vh;
+  position:relative;
+  z-index:1;
+  animation:boot-in .5s ease-out forwards;
+}
+
+/* ── NAV ── */
+nav{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px;
+  background:rgba(2,11,18,.95);
+  border-bottom:1px solid var(--border);
+  position:relative;
+  z-index:100;
+  flex-shrink:0;
+  min-width:0;
+  overflow:hidden;
+}
+nav::after{
+  content:'';
+  position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--neon) 30%,var(--neon-hot) 70%,transparent);
+  opacity:.5;
+}
+
+.header-brand{
+  font-family:'Orbitron',sans-serif;
+  font-weight:900;
+  font-size:18px;
+  letter-spacing:6px;
+  color:var(--neon);
+  text-shadow:0 0 20px rgba(0,255,231,.5);
+  flex-shrink:0;
+  position:relative;
+}
+.header-brand::after{
+  content:'';
+  position:absolute;bottom:-4px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,var(--neon),transparent);
+}
+
+.brand-tag{
+  font-family:'Share Tech Mono';
+  font-size:8px;
+  color:var(--neon-hot);
+  letter-spacing:2px;
+  display:block;
+  margin-top:1px;
+}
+
+/* ── SCROLL ── */
+.nav-scroll{
+  display:flex;gap:8px;
+  overflow-x:auto;flex:1;
+  cursor:grab;padding:4px 8px;
+  scroll-behavior:smooth;
+  align-items:center;
+}
+.nav-scroll::-webkit-scrollbar{height:3px;}
+.nav-scroll::-webkit-scrollbar-track{background:transparent;}
+.nav-scroll::-webkit-scrollbar-thumb{background:var(--neon-dim);border-radius:2px;}
+
+/* ── NAV BUTTONS ── */
+.nav-link{
+  height:36px;
+  padding:0 14px;
+  border-radius:3px;
+  border:1px solid rgba(0,255,231,.1);
+  background:transparent;
+  color:var(--text-dim);
+  font-family:'Exo 2',sans-serif;
+  font-weight:600;
+  font-size:12px;
+  letter-spacing:1px;
+  white-space:nowrap;
+  flex-shrink:0;
+  cursor:pointer;
+  transition:all .2s;
+  position:relative;
+  overflow:hidden;
+  text-transform:uppercase;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.nav-link::before{
+  content:'';
+  position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(0,255,231,.12),transparent);
+  transition:.4s;
+}
+.nav-link:hover::before{left:200%;}
+.nav-link:hover{
+  color:var(--neon);
+  border-color:rgba(0,255,231,.5);
+  background:rgba(0,255,231,.06);
+  text-shadow:0 0 10px rgba(0,255,231,.6);
+  box-shadow:0 0 14px rgba(0,255,231,.15);
+  transform:translateY(-1px);
+}
+.nav-link:active{transform:scale(.96);}
+
+/* ── TOOL BUTTONS ── */
+.controls{display:flex;gap:6px;flex-shrink:0;}
+
+.tool-btn{
+  height:38px;
+  padding:0 14px;
+  border-radius:3px;
+  border:1px solid rgba(0,255,231,.2);
+  background:rgba(0,255,231,.04);
+  color:var(--text);
+  font-family:'Share Tech Mono';
+  font-size:10px;
+  letter-spacing:1.5px;
+  cursor:pointer;
+  transition:all .2s;
+  position:relative;
+  overflow:hidden;
+  white-space:nowrap;
+}
+.tool-btn::after{
+  content:'';
+  position:absolute;top:0;left:-200%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(0,255,231,.15),transparent);
+  transition:0s;
+}
+.tool-btn:hover::after{
+  left:200%;
+  transition:.5s;
+}
+.tool-btn:hover{
+  border-color:var(--neon);
+  color:var(--neon);
+  box-shadow:0 0 16px rgba(0,255,231,.2),inset 0 0 8px rgba(0,255,231,.05);
+  transform:translateY(-1px);
+}
+.tool-btn:active{transform:scale(.96);}
+
+.danger{
+  color:#ff7676;
+  border-color:rgba(255,45,120,.2);
+  background:rgba(255,45,120,.04);
+}
+.danger:hover{
+  color:var(--neon-hot);
+  border-color:var(--neon-hot);
+  box-shadow:0 0 16px rgba(255,45,120,.3),inset 0 0 8px rgba(255,45,120,.08);
+}
+
+/* ── STATUS BAR ── */
+.status-bar{
+  display:flex;align-items:center;gap:16px;
+  padding:4px 14px;
+  background:rgba(0,8,14,.9);
+  border-bottom:1px solid rgba(0,255,231,.08);
+  font-family:'Share Tech Mono';
+  font-size:10px;
+  color:var(--text-dim);
+  letter-spacing:1.5px;
+  flex-shrink:0;
+}
+.status-node{
+  display:flex;align-items:center;gap:6px;
+}
+.node-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--neon);
+  box-shadow:0 0 6px var(--neon);
+  animation:blink 2s ease-in-out infinite;
+}
+.node-dot.hot{background:var(--neon-hot);box-shadow:0 0 6px var(--neon-hot);}
+.node-dot.gold{background:var(--neon-gold);box-shadow:0 0 6px var(--neon-gold);animation-delay:.7s;}
+.status-bar .sep{color:rgba(0,255,231,.2);}
+.status-time{
+  margin-left:auto;
+  color:var(--neon);
+  opacity:.6;
+}
+
+/* ── VIEWPORT ── */
+#viewport{
+  position:relative;flex:1;overflow:hidden;
+}
+
+.os-frame{
+  width:100%;height:100%;border:none;
+  position:relative;z-index:2;
+}
+
+/* ── IDLE SCREEN ── */
+#bg-char{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  gap:0;
+  z-index:1;
+}
+
+.idle-ring{
+  position:relative;
+  width:200px;height:200px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:30px;
+}
+.idle-ring::before,.idle-ring::after{
+  content:'';
+  position:absolute;
+  border-radius:50%;
+}
+.idle-ring::before{
+  inset:0;
+  border:1px solid rgba(0,255,231,.15);
+  box-shadow:0 0 40px rgba(0,255,231,.1),inset 0 0 40px rgba(0,255,231,.05);
+}
+.idle-ring::after{
+  inset:10px;
+  border:1px dashed rgba(0,255,231,.08);
+  animation:corner-spin 20s linear infinite;
+}
+
+.idle-inner{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.idle-logo{
+  font-family:'Orbitron',sans-serif;
+  font-size:32px;font-weight:900;
+  letter-spacing:6px;
+  color:var(--neon);
+  text-shadow:0 0 30px rgba(0,255,231,.5);
+}
+.idle-tagline{
+  font-family:'Share Tech Mono';
+  font-size:9px;letter-spacing:4px;
+  color:var(--text-dim);
+}
+
+.idle-sep{
+  width:280px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--neon) 50%,transparent);
+  opacity:.3;
+  margin-bottom:16px;
+}
+
+.idle-stat{
+  font-family:'Share Tech Mono';
+  font-size:11px;letter-spacing:3px;
+  color:var(--text-dim);
+  display:flex;align-items:center;gap:8px;
+}
+.idle-stat .s-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--neon);
+  box-shadow:0 0 8px var(--neon);
+  animation:blink 1.5s ease-in-out infinite;
+}
+
+/* corner decorations in viewport */
+.vp-corner{
+  position:absolute;width:30px;height:30px;z-index:3;pointer-events:none;
+}
+.vp-corner::before,.vp-corner::after{content:'';position:absolute;background:rgba(0,255,231,.3);}
+.vp-corner::before{width:100%;height:1px;top:0;left:0;}
+.vp-corner::after{width:1px;height:100%;top:0;left:0;}
+.vp-corner.tr{top:8px;right:8px;transform:rotate(90deg);}
+.vp-corner.tl{top:8px;left:8px;}
+.vp-corner.br{bottom:8px;right:8px;transform:rotate(180deg);}
+.vp-corner.bl{bottom:8px;left:8px;transform:rotate(270deg);}
+
+/* ── SCANLINES OVERLAY ON VIEWPORT ── */
+#viewport::after{
+  content:'';
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,.06) 2px,
+    rgba(0,0,0,.06) 4px
+  );
+  pointer-events:none;
+  z-index:10;
+}
+
+.nav-link.active{
+  color:var(--neon);
+  border-color:rgba(0,255,231,.6);
+  background:rgba(0,255,231,.1);
+  box-shadow:0 0 14px rgba(0,255,231,.2);
+}
+/* ── LOADER ── */
+@keyframes spin-arc{
+  0%{stroke-dashoffset:440;}
+  50%{stroke-dashoffset:110;}
+  100%{stroke-dashoffset:440;transform:rotate(360deg);transform-origin:center;}
+}
+@keyframes rotate-ring{
+  from{transform:rotate(0deg);}
+  to{transform:rotate(360deg);}
+}
+@keyframes bar-fill{
+  0%{width:0%;}
+  20%{width:35%;}
+  50%{width:62%;}
+  80%{width:85%;}
+  95%{width:95%;}
+}
+@keyframes packet-flash{
+  0%,100%{opacity:0;}
+  50%{opacity:1;}
+}
+@keyframes loader-fade-in{
+  from{opacity:0;}to{opacity:1;}
+}
+
+#loader{
+  position:absolute;inset:0;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:20px;
+  background:var(--bg);
+  z-index:5;
+  animation:loader-fade-in .3s ease;
+}
+
+.loader-ring{
+  position:relative;
+  width:160px;height:160px;
+  display:flex;align-items:center;justify-content:center;
+}
+
+.loader-svg{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  animation:rotate-ring 2s linear infinite;
+}
+
+.loader-svg .track{
+  fill:none;
+  stroke:rgba(0,255,231,.08);
+  stroke-width:2;
+}
+
+.loader-svg .spin{
+  fill:none;
+  stroke:var(--neon);
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-dasharray:440;
+  stroke-dashoffset:330;
+  filter:drop-shadow(0 0 6px var(--neon));
+}
+
+.loader-inner{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  z-index:1;
+}
+
+.loader-logo{
+  font-family:'Orbitron',sans-serif;
+  font-size:28px;font-weight:900;
+  letter-spacing:4px;
+  color:var(--neon);
+  text-shadow:0 0 20px rgba(0,255,231,.6);
+}
+
+.loader-site{
+  font-family:'Share Tech Mono';
+  font-size:9px;letter-spacing:3px;
+  color:var(--neon-hot);
+  text-shadow:0 0 8px rgba(255,45,120,.5);
+}
+
+.loader-bar-wrap{
+  width:260px;height:2px;
+  background:rgba(0,255,231,.08);
+  border-radius:2px;
+  overflow:hidden;
+}
+
+.loader-bar{
+  height:100%;width:0;
+  background:linear-gradient(90deg,var(--neon),var(--neon-hot));
+  box-shadow:0 0 10px var(--neon);
+  border-radius:2px;
+  transition:width .3s ease;
+}
+
+.loader-status{
+  font-family:'Share Tech Mono';
+  font-size:10px;letter-spacing:3px;
+  color:var(--text-dim);
+}
+
+.loader-packets{
+  display:flex;gap:6px;
+}
+
+.loader-packets span{
+  width:4px;height:4px;border-radius:50%;
+  background:var(--neon);
+  box-shadow:0 0 6px var(--neon);
+  animation:packet-flash .8s ease-in-out infinite;
+}
+.loader-packets span:nth-child(2){animation-delay:.15s;}
+.loader-packets span:nth-child(3){animation-delay:.3s;}
+.loader-packets span:nth-child(4){animation-delay:.45s;}
+.loader-packets span:nth-child(5){animation-delay:.6s;}
+
+.blocked-msg{
+  font-family:'Share Tech Mono';
+  font-size:11px;letter-spacing:3px;
+  color:var(--neon-hot);
+  text-shadow:0 0 10px rgba(255,45,120,.5);
+}
+
+.blocked-btn{
+  padding:10px 28px;
+  border:1px solid var(--neon-hot);
+  background:rgba(255,45,120,.08);
+  color:var(--neon-hot);
+  font-family:'Share Tech Mono';
+  font-size:11px;letter-spacing:3px;
+  border-radius:3px;
+  cursor:pointer;
+  transition:all .2s;
+  text-shadow:0 0 8px rgba(255,45,120,.4);
+}
+.blocked-btn:hover{
+  background:rgba(255,45,120,.18);
+  box-shadow:0 0 20px rgba(255,45,120,.3);
+  transform:translateY(-1px);
+}
+.blocked-btn:active{transform:scale(.96);}
+
+#file-input{display:none;}
+</style>
+</head>
+<body>
+
+<!-- ════════ GATE ════════ -->
+<div id="gate">
+  <div class="gate-hex-bg">
+    <span></span><span></span><span></span>
+    <span></span><span></span><span></span>
+  </div>
+
+  <div class="gate-corner tl"></div>
+  <div class="gate-corner tr"></div>
+  <div class="gate-corner bl"></div>
+  <div class="gate-corner br"></div>
+
+  <p class="gate-eyebrow">◈ SECURE ACCESS PORTAL ◈</p>
+  <h1 class="gate-title">CYBERTECH</h1>
+  <p class="gate-subtitle">COMMAND CENTER // v4.7</p>
+
+  <div class="gate-input-wrap">
+    <input id="entry" placeholder="ENTER PASSCODE" autocomplete="off">
+  </div>
+
+  <div class="gate-status">
+    <span class="status-dot"></span>
+    AWAITING AUTHORIZATION
+  </div>
+</div>
+
+<!-- ════════ MAIN UI ════════ -->
+<div id="main-ui">
+
+  <nav id="nav-bar">
+    <div class="header-brand">
+      CYBERTECH
+      <span class="brand-tag">CMD // ONLINE</span>
+    </div>
+
+    <div class="nav-scroll">
+      <button class="nav-link" onclick="go('https://xylora.on.top.thenookfactory.com//', this)">Xylora</button>
+
+
+
+      <button class="nav-link" onclick="go('https://calculus.homework.biology.geography.lecture.bigrocktechnologies.com/', this)">Otonic</button>
+      <button class="nav-link" onclick="go('https://jaydenmakesstuff.eleomedio-coach.hu/', this)">Vapor</button>
+      <button class="nav-link" onclick="go('https://hiandhello4.eleomedio-coach.hu/?/', this)">Void Network</button>
+      <button class="nav-link" onclick="go('https://inf41480.hydros.cl/', this)">Infamous</button>
+      <button class="nav-link" onclick="go('https://lsrelay-l.s3.amazonaws.com/index.html#/g', this)">Lucide</button>
+      <button class="nav-link" onclick="go('https://s3.amazonaws.com/ghst/index.html', this)">Ghost</button>
+      <button class="nav-link" onclick="go('https://bomboclat-wallahi.urpalestinian.tokeslaszlo.eu/', this)">Relic Network</button>
+      <button class="nav-link" onclick="go('https://d1kdg4gl68lhf1.cloudfront.net/gxmes.html', this)">EDU Rocks</button>
+      <button class="nav-link" onclick="go('https://ixllearning-bengali89.firebaseapp.com/', this)">Noah's Butthole</button>
+      <button class="nav-link" onclick="go('https://gsyostos9t.ceifjskdj.fwh.is/', this)">Frogie's Arcade</button>
+      <button class="nav-link" onclick="go('https://strawberry.avtosnoj.si', this)">Ford</button>
+    </div>
+
+    <div class="controls">
+      <input type="file" id="file-input" onchange="handleUpload(event)">
+      <button class="tool-btn" onclick="triggerUpload()">UPLOAD</button>
+      <button class="tool-btn" onclick="toggleFS()">FULLSCREEN</button>
+      <button class="tool-btn" onclick="popAndClear()">POP-OUT</button>
+      <button class="tool-btn danger" onclick="destroyFrame()">CLOSE</button>
+    </div>
+  </nav>
+
+  <div class="status-bar">
+    <div class="status-node"><span class="node-dot"></span>NODE-01 ACTIVE</div>
+    <span class="sep">|</span>
+    <div class="status-node"><span class="node-dot gold"></span>UPLINK STABLE</div>
+    <span class="sep">|</span>
+    <div class="status-node"><span class="node-dot hot"></span>ENCRYPTION: AES-512</div>
+    <span class="sep">|</span>
+    <span>SECTOR: ALPHA</span>
+    <span class="status-time" id="clock">--:--:--</span>
+  </div>
+
+  <div id="viewport">
+    <div class="vp-corner tl"></div>
+    <div class="vp-corner tr"></div>
+    <div class="vp-corner bl"></div>
+    <div class="vp-corner br"></div>
+
+    <div id="bg-char">
+      <div class="idle-ring">
+        <div class="idle-inner">
+          <div class="idle-logo">CT</div>
+          <div class="idle-tagline">TERMINAL</div>
+        </div>
+      </div>
+      <div class="idle-sep"></div>
+      <div class="idle-stat"><span class="s-dot"></span>NODE 01 // SYSTEM READY</div>
+    </div>
+
+    <div id="loader">
+      <div class="loader-ring">
+        <div class="loader-inner">
+          <div class="loader-logo">CT</div>
+          <div class="loader-site" id="loader-site">LOADING</div>
+        </div>
+        <svg class="loader-svg" viewBox="0 0 160 160">
+          <circle class="track" cx="80" cy="80" r="70"/>
+          <circle class="spin" cx="80" cy="80" r="70"/>
+        </svg>
+      </div>
+      <div class="loader-bar-wrap">
+        <div class="loader-bar" id="loader-bar"></div>
+      </div>
+      <div class="loader-status" id="loader-status">ESTABLISHING CONNECTION...</div>
+      <div class="loader-packets" id="loader-packets">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div id="loader-blocked" style="display:none;flex-direction:column;align-items:center;gap:12px;margin-top:8px;">
+        <div class="blocked-msg">⚠ NODE REFUSED DIRECT CONNECTION</div>
+        <button class="blocked-btn" id="blocked-open-btn">OPEN IN NEW TAB</button>
+      </div>
+    </div>
+
+    <iframe id="screen" class="os-frame" src="about:blank" style="display:none;"></iframe>
+  </div>
+</div>
+
+<script>
+const entry  = document.getElementById('entry');
+const gate   = document.getElementById('gate');
+const ui     = document.getElementById('main-ui');
+const bg     = document.getElementById('bg-char');
+const screen = document.getElementById('screen');
+const loader = document.getElementById('loader');
+
+/* ── Gate unlock ── */
+entry.addEventListener('input', () => {
+  if (entry.value === 'Cybertech123') {
+    gate.style.opacity = '0';
+    setTimeout(() => {
+      gate.style.display = 'none';
+      ui.style.display   = 'flex';
+    }, 600);
+  }
+});
+
+/* ── Nav buttons ── */
+document.querySelectorAll('.nav-link').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const url = btn.dataset.url;
+    if (!url) return;
+    go(url, btn);
+  });
+});
+
+function showLoader() {
+  const bar      = document.getElementById('loader-bar');
+  const statusEl = document.getElementById('loader-status');
+  const packets  = document.getElementById('loader-packets');
+  const blocked  = document.getElementById('loader-blocked');
+
+  // Reset
+  bar.style.width      = '0%';
+  bar.style.background = 'linear-gradient(90deg, var(--neon), var(--neon-hot))';
+  blocked.style.display = 'none';
+  packets.style.display = 'flex';
+  statusEl.style.color  = '';
+  statusEl.textContent  = 'ESTABLISHING CONNECTION...';
+
+  loader.style.display = 'flex';
+
+  // Animate bar stages while loader is visible
+  const stages = [
+    { w:'25%', msg:'ESTABLISHING CONNECTION...' },
+    { w:'50%', msg:'HANDSHAKE COMPLETE...' },
+    { w:'72%', msg:'DECRYPTING PAYLOAD...' },
+    { w:'88%', msg:'RENDERING NODE...' },
+    { w:'100%',msg:'ACCESS GRANTED' },
+  ];
+  let i = 0;
+  const iv = setInterval(() => {
+    if (i < stages.length) {
+      bar.style.width      = stages[i].w;
+      statusEl.textContent = stages[i].msg;
+      i++;
+    } else {
+      clearInterval(iv);
+      setTimeout(() => { loader.style.display = 'none'; }, 200);
+    }
+  }, 280);
+}
+
+function go(url, btn) {
+  document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  document.getElementById('loader-site').textContent =
+    btn ? btn.textContent.trim().toUpperCase() : 'RESOURCE';
+
+  showLoader();
+
+  screen.style.display = 'block';
+  bg.style.display     = 'none';
+
+  setTimeout(() => { screen.src = url; }, 300);
+}
+
+/* ── Tool buttons ── */
+function triggerUpload() {
+  document.getElementById('file-input').click();
+}
+
+function handleUpload(e) {
+  const file = e.target.files[0];
+  if (file) {
+    go(URL.createObjectURL(file), null);
+    e.target.value = ''; // reset so same file can be re-uploaded
+  }
+}
+
+function destroyFrame() {
+  screen.onload        = null;
+  screen.onerror       = null;
+  screen.style.display = 'none';
+  screen.src           = 'about:blank';
+  loader.style.display = 'none';
+  document.getElementById('loader-blocked').style.display = 'none';
+  document.getElementById('loader-bar').style.background  =
+    'linear-gradient(90deg, var(--neon), var(--neon-hot))';
+  bg.style.display = 'flex';
+  document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+}
+
+function popAndClear() {
+  const src = screen.src;
+  if (src && src !== 'about:blank') {
+    window.open(src, '_blank');
+    destroyFrame();
+  }
+}
+
+function toggleFS() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+/* ── Clock ── */
+function tick() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0') + ':' +
+    String(now.getSeconds()).padStart(2,'0');
+}
+tick(); setInterval(tick, 1000);
+
+/* ── Nav drag-scroll ── */
+const navScroll = document.querySelector('.nav-scroll');
+let down = false, startX, scrollLeft;
+navScroll.addEventListener('mousedown', e => {
+  down = true; navScroll.style.cursor = 'grabbing';
+  startX = e.pageX - navScroll.offsetLeft;
+  scrollLeft = navScroll.scrollLeft;
+});
+window.addEventListener('mouseup',    () => { down = false; navScroll.style.cursor = 'grab'; });
+navScroll.addEventListener('mouseleave', () => { down = false; navScroll.style.cursor = 'grab'; });
+navScroll.addEventListener('mousemove', e => {
+  if (!down) return;
+  e.preventDefault();
+  navScroll.scrollLeft = scrollLeft - (e.pageX - navScroll.offsetLeft - startX) * 1.5;
+});
+navScroll.addEventListener('wheel', e => {
+  e.preventDefault();
+  navScroll.scrollLeft += e.deltaY;
+}, { passive: false });
+</script>
+</body>
+</html>
