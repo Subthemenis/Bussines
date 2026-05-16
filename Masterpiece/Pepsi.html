@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pepsi | Command Center</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --blue:#005cb4;
+    --blue2:#008cff;
+    --red:#e31b23;
+    --dark:#000814;
+    --navy:#001c3d;
+    --text:#d8efff;
+    --text-dim:#73a7d6;
+    --glass:rgba(255,255,255,.04);
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:var(--dark);
+    color:var(--text);
+    font-family:'Rajdhani',sans-serif;
+}
+
+/* =========================
+   GATE
+========================= */
+
+#gate{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+    linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.7)),
+    url('https://raw.githubusercontent.com/Subthemenis/Images/refs/heads/main/Pepsi.png')
+    center/cover no-repeat;
+    z-index:999;
+    transition:.5s;
+}
+
+.gate-box{
+    width:520px;
+    padding:50px;
+    border-radius:28px;
+    background:rgba(0,10,25,.72);
+    backdrop-filter:blur(25px);
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:
+    0 0 50px rgba(0,92,180,.35),
+    0 0 90px rgba(227,27,35,.12);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.gate-eyebrow{
+    font-size:12px;
+    letter-spacing:6px;
+    margin-bottom:15px;
+    color:#fff;
+    font-family:'Share Tech Mono';
+    text-transform:uppercase;
+}
+
+.gate-title{
+    font-size:92px;
+    letter-spacing:14px;
+    color:white;
+    text-transform:uppercase;
+    line-height:1;
+    text-shadow:
+    0 0 25px rgba(0,92,180,.8),
+    0 0 40px rgba(227,27,35,.35);
+}
+
+#entry{
+    margin-top:28px;
+    width:320px;
+    padding:16px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);
+    background:rgba(0,92,180,.12);
+    color:white;
+    outline:none;
+    font-size:20px;
+    text-align:center;
+    font-family:'Share Tech Mono';
+    letter-spacing:5px;
+    transition:.2s;
+}
+
+#entry:focus{
+    border-color:var(--red);
+    box-shadow:
+    0 0 18px rgba(227,27,35,.35),
+    inset 0 0 18px rgba(227,27,35,.12);
+}
+
+/* =========================
+   MAIN
+========================= */
+
+#main-ui{
+    display:none;
+    flex-direction:column;
+    height:100vh;
+}
+
+/* =========================
+   NAV
+========================= */
+
+nav{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px;
+    background:rgba(0,12,30,.96);
+    border-bottom:1px solid rgba(255,255,255,.08);
+    backdrop-filter:blur(12px);
+}
+
+.header-brand{
+    font-size:24px;
+    font-weight:700;
+    letter-spacing:5px;
+    color:white;
+    flex-shrink:0;
+    text-transform:uppercase;
+    text-shadow:
+    0 0 15px rgba(0,92,180,.6);
+}
+
+/* =========================
+   SCROLL
+========================= */
+
+.nav-scroll{
+    display:flex;
+    gap:10px;
+    overflow-x:auto;
+    flex:1;
+    cursor:grab;
+    scroll-behavior:smooth;
+}
+
+.nav-scroll::-webkit-scrollbar{
+    height:4px;
+}
+
+.nav-scroll::-webkit-scrollbar-thumb{
+    background:var(--blue);
+    border-radius:10px;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.nav-link{
+    min-height:42px;
+    padding:0 18px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.03);
+    color:var(--text-dim);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    white-space:nowrap;
+    cursor:pointer;
+    font-weight:700;
+    transition:.2s;
+}
+
+.nav-link:hover{
+    transform:translateY(-2px);
+    color:white;
+    background:
+    linear-gradient(
+    135deg,
+    rgba(0,92,180,.9),
+    rgba(227,27,35,.9));
+    border-color:white;
+    box-shadow:
+    0 0 20px rgba(227,27,35,.25);
+}
+
+.nav-link:active{
+    transform:scale(.96);
+}
+
+/* =========================
+   TOOL BUTTONS
+========================= */
+
+.controls{
+    display:flex;
+    gap:8px;
+}
+
+.tool-btn{
+    min-width:115px;
+    height:40px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.12);
+    background:
+    linear-gradient(
+    rgba(0,92,180,.25),
+    rgba(0,28,61,.95));
+    color:white;
+    font-family:'Share Tech Mono';
+    font-size:11px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.tool-btn:hover{
+    transform:translateY(-2px);
+    background:
+    linear-gradient(
+    rgba(227,27,35,.95),
+    rgba(130,0,0,.95));
+    border-color:white;
+    box-shadow:
+    0 0 18px rgba(227,27,35,.3);
+}
+
+.tool-btn:active{
+    transform:scale(.96);
+}
+
+.danger{
+    color:#ff9f9f;
+}
+
+/* =========================
+   VIEWPORT
+========================= */
+
+#viewport{
+    position:relative;
+    flex:1;
+    overflow:hidden;
+    background:black;
+}
+
+.os-frame{
+    width:100%;
+    height:100%;
+    border:none;
+    display:none;
+}
+
+/* =========================
+   WELCOME
+========================= */
+
+#bg-char{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:14px;
+    background:
+    radial-gradient(circle at center,
+    rgba(0,92,180,.22),
+    transparent 60%);
+}
+
+#bg-char h2{
+    font-size:76px;
+    letter-spacing:14px;
+    color:white;
+    text-transform:uppercase;
+    text-shadow:
+    0 0 25px rgba(0,92,180,.45);
+}
+
+.welcome-line{
+    width:300px;
+    height:2px;
+    background:
+    linear-gradient(
+    90deg,
+    transparent,
+    var(--blue),
+    var(--red),
+    transparent);
+}
+
+.status{
+    font-family:'Share Tech Mono';
+    color:var(--text-dim);
+    letter-spacing:3px;
+    font-size:12px;
+}
+
+/* =========================
+   LOADER
+========================= */
+
+#loader{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,.92);
+    z-index:50;
+    display:none;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    gap:18px;
+}
+
+.loader-text{
+    font-family:'Share Tech Mono';
+    font-size:13px;
+    letter-spacing:3px;
+    color:white;
+}
+
+.loader-bar{
+    width:260px;
+    height:4px;
+    overflow:hidden;
+    background:rgba(255,255,255,.08);
+    border-radius:10px;
+    position:relative;
+}
+
+.loader-fill{
+    width:40%;
+    height:100%;
+    position:absolute;
+    background:
+    linear-gradient(
+    90deg,
+    var(--blue),
+    var(--red));
+    animation:slide 1.2s infinite linear;
+}
+
+@keyframes slide{
+    from{left:-40%;}
+    to{left:100%;}
+}
+
+#file-input{
+    display:none;
+}
+</style>
+</head>
+<body>
+
+<!-- GATE -->
+
+<div id="gate">
+
+<div class="gate-box">
+
+<p class="gate-eyebrow">
+Global Pepsi Network
+</p>
+
+<h1 class="gate-title">
+PEPSI
+</h1>
+
+<input
+id="entry"
+placeholder="ENTER PASSCODE"
+autocomplete="off">
+
+</div>
+
+</div>
+
+<!-- MAIN -->
+
+<div id="main-ui">
+
+<nav>
+
+<div class="header-brand">
+PEPSI
+</div>
+
+<div class="nav-scroll">
+
+<button class="nav-link" onclick="go('https://xylora.on.top.thenookfactory.com//')">Xylora</button>
+<button class="nav-link">Axis</button>
+<button class="nav-link">Cherri</button>
+<button class="nav-link">Otonic</button>
+<button class="nav-link">Vapor</button>
+<button class="nav-link">Void Network</button>
+<button class="nav-link">Infamous</button>
+<button class="nav-link">Velara</button>
+<button class="nav-link">Lucid</button>
+<button class="nav-link">Ghost</button>
+<button class="nav-link">Tung Tung</button>
+<button class="nav-link">Relic Network</button>
+<button class="nav-link">EDU Rocks</button>
+<button class="nav-link">Frogie's Arcade</button>
+<button class="nav-link">Ford</button>
+
+</div>
+
+<div class="controls">
+
+<input type="file" id="file-input" onchange="handleUpload(event)">
+
+<button class="tool-btn" onclick="triggerUpload()">
+UPLOAD
+</button>
+
+<button class="tool-btn" onclick="toggleFS()">
+FULLSCREEN
+</button>
+
+<button class="tool-btn" onclick="popoutAB()">
+POPOUT: AB
+</button>
+
+<button class="tool-btn" onclick="popoutBlob()">
+POPOUT: BLOB
+</button>
+
+<button class="tool-btn danger" onclick="destroyFrame()">
+CLOSE
+</button>
+
+</div>
+
+</nav>
+
+<div id="viewport">
+
+<div id="loader">
+
+<div class="loader-text">
+SYNCING PEPSI NETWORK...
+</div>
+
+<div class="loader-bar">
+<div class="loader-fill"></div>
+</div>
+
+</div>
+
+<div id="bg-char">
+
+<h2>PEPSI</h2>
+
+<div class="welcome-line"></div>
+
+<div class="status">
+NODE ACTIVE // COMMAND CENTER READY
+</div>
+
+</div>
+
+<iframe
+id="screen"
+class="os-frame"
+src="about:blank"
+allowfullscreen>
+</iframe>
+
+</div>
+
+</div>
+
+<script>
+
+const entry=document.getElementById("entry");
+const gate=document.getElementById("gate");
+const ui=document.getElementById("main-ui");
+const bg=document.getElementById("bg-char");
+const screen=document.getElementById("screen");
+const loader=document.getElementById("loader");
+
+/* =========================
+   PASSCODE
+========================= */
+
+entry.addEventListener("input",()=>{
+
+if(entry.value==="Pepsi123"){
+
+gate.style.opacity="0";
+
+setTimeout(()=>{
+
+gate.style.display="none";
+ui.style.display="flex";
+
+},500);
+
+}
+
+});
+
+/* =========================
+   LOADER
+========================= */
+
+function showLoader(){
+
+loader.style.display="flex";
+
+setTimeout(()=>{
+loader.style.display="none";
+},700);
+
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function go(url){
+
+showLoader();
+
+screen.style.display="block";
+bg.style.display="none";
+
+setTimeout(()=>{
+screen.src=url;
+},300);
+
+}
+
+/* =========================
+   FILE UPLOAD
+========================= */
+
+function triggerUpload(){
+document.getElementById("file-input").click();
+}
+
+function handleUpload(e){
+
+const file=e.target.files[0];
+
+if(file){
+
+showLoader();
+
+setTimeout(()=>{
+
+go(URL.createObjectURL(file));
+
+},250);
+
+}
+
+}
+
+/* =========================
+   CLOSE
+========================= */
+
+function destroyFrame(){
+
+screen.src="about:blank";
+screen.style.display="none";
+bg.style.display="flex";
+
+}
+
+/* =========================
+   ABOUT BLANK POPOUT
+========================= */
+
+function getCurrentContent(){
+
+if(screen.src && screen.src!=="about:blank"){
+
+return `
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html,body{
+margin:0;
+width:100%;
+height:100%;
+overflow:hidden;
+background:black;
+}
+iframe{
+width:100%;
+height:100%;
+border:none;
+}
+</style>
+</head>
+<body>
+<iframe src="${screen.src}" allowfullscreen></iframe>
+</body>
+</html>`;
+
+}
+
+return `
+<div style="
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:black;
+color:white;
+font-family:sans-serif;">
+No content loaded
+</div>`;
+
+}
+
+function popoutAB(){
+
+const content=getCurrentContent();
+
+const win=window.open("about:blank","_blank");
+
+if(win){
+
+win.document.open();
+win.document.write(content);
+win.document.close();
+
+}
+
+}
+
+function popoutBlob(){
+
+const content=getCurrentContent();
+
+const blob=new Blob(
+[content],
+{type:"text/html"}
+);
+
+const url=URL.createObjectURL(blob);
+
+window.open(url,"_blank");
+
+}
+
+/* =========================
+   FULLSCREEN
+========================= */
+
+function toggleFS(){
+
+if(!document.fullscreenElement){
+
+document.documentElement.requestFullscreen();
+
+}else{
+
+document.exitFullscreen();
+
+}
+
+}
+
+/* =========================
+   DRAG SCROLL
+========================= */
+
+const nav=document.querySelector(".nav-scroll");
+
+let down=false;
+let startX;
+let scrollLeft;
+
+nav.addEventListener("mousedown",e=>{
+
+down=true;
+
+nav.style.cursor="grabbing";
+
+startX=e.pageX-nav.offsetLeft;
+
+scrollLeft=nav.scrollLeft;
+
+});
+
+window.addEventListener("mouseup",()=>{
+
+down=false;
+
+nav.style.cursor="grab";
+
+});
+
+nav.addEventListener("mouseleave",()=>{
+
+down=false;
+
+nav.style.cursor="grab";
+
+});
+
+nav.addEventListener("mousemove",e=>{
+
+if(!down)return;
+
+e.preventDefault();
+
+const x=e.pageX-nav.offsetLeft;
+
+const walk=(x-startX)*1.5;
+
+nav.scrollLeft=scrollLeft-walk;
+
+});
+
+/* mouse wheel support */
+
+nav.addEventListener("wheel",e=>{
+
+e.preventDefault();
+
+nav.scrollLeft+=e.deltaY;
+
+},{passive:false});
+
+</script>
+
+</body>
+</html>
