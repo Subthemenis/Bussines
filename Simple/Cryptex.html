@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cryptex</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+--blue:#00aaff;
+--bg:#05090f;
+--panel:#0a1118;
+--text:#c8e7ff;
+--dim:#6d8aa0;
+}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Rajdhani,sans-serif;
+}
+
+body{
+height:100vh;
+overflow:hidden;
+background:var(--bg);
+color:var(--text);
+}
+
+/* LOGIN */
+
+#gate{
+position:fixed;
+inset:0;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+gap:20px;
+background:var(--bg);
+z-index:999;
+transition:.4s;
+}
+
+.logo{
+font-size:70px;
+font-weight:700;
+letter-spacing:10px;
+color:white;
+text-shadow:0 0 20px rgba(0,170,255,.4);
+}
+
+#entry{
+width:280px;
+padding:14px;
+border:none;
+border-radius:12px;
+background:var(--panel);
+border:1px solid rgba(255,255,255,.08);
+color:white;
+text-align:center;
+font-size:18px;
+outline:none;
+}
+
+#entry:focus{
+border-color:var(--blue);
+}
+
+/* MAIN */
+
+#main{
+display:none;
+flex-direction:column;
+height:100vh;
+}
+
+nav{
+height:60px;
+display:flex;
+align-items:center;
+padding:0 14px;
+gap:14px;
+background:var(--panel);
+border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+.brand{
+font-size:22px;
+font-weight:700;
+color:var(--blue);
+flex-shrink:0;
+}
+
+/* SCROLL BAR */
+
+.scroll{
+display:flex;
+gap:8px;
+overflow-x:auto;
+flex:1;
+scroll-behavior:smooth;
+cursor:grab;
+
+scrollbar-width:thin;
+scrollbar-color:#00aaff #0a1118;
+}
+
+.scroll::-webkit-scrollbar{
+height:8px;
+}
+
+.scroll::-webkit-scrollbar-track{
+background:#0a1118;
+border-radius:999px;
+}
+
+.scroll::-webkit-scrollbar-thumb{
+background:#00aaff;
+border-radius:999px;
+}
+
+.scroll::-webkit-scrollbar-thumb:hover{
+background:#3fc2ff;
+}
+
+.site-btn{
+padding:8px 14px;
+border:none;
+border-radius:999px;
+background:#111a24;
+color:var(--dim);
+cursor:pointer;
+transition:.2s;
+white-space:nowrap;
+flex-shrink:0;
+}
+
+.site-btn:hover{
+background:#152432;
+color:white;
+transform:translateY(-2px);
+}
+
+/* VIEWPORT */
+
+#viewport{
+flex:1;
+position:relative;
+background:black;
+}
+
+iframe{
+width:100%;
+height:100%;
+border:none;
+}
+
+#welcome{
+position:absolute;
+inset:0;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+gap:10px;
+}
+
+#welcome h1{
+font-size:40px;
+color:white;
+}
+
+#welcome p{
+font-size:18px;
+color:var(--dim);
+}
+</style>
+</head>
+<body>
+
+<div id="gate">
+<div class="logo">CRYPTEX</div>
+
+<input
+id="entry"
+placeholder="Enter Passcode"
+autocomplete="off">
+</div>
+
+<div id="main">
+
+<nav>
+
+<div class="brand">
+CRYPTEX
+</div>
+
+<div class="scroll" id="sites"></div>
+
+</nav>
+
+<div id="viewport">
+
+<div id="welcome">
+<h1>Welcome to Cryptex</h1>
+<p>Select a site above</p>
+</div>
+
+<iframe id="screen" src="about:blank"></iframe>
+
+</div>
+</div>
+
+<script>
+
+const pages=[
+
+["Xylora","https://xylora.on.top.thenookfactory.com/"],
+["Axis","https://axischurch.ldeazevedo.com/"],
+["Cherri","https://larp.zinets.ca/onboarding/"],
+["Otonic","https://calculus.homework.biology.geography.lecture.bigrocktechnologies.com/"],
+["Vapor","https://jaydenmakesstuff.eleomedio-coach.hu/"],
+["Void Network","https://hiandhello4.eleomedio-coach.hu/"],
+["Lucide","https://lsrelay-l.s3.amazonaws.com/index.html"],
+["Ghost","https://s3.amazonaws.com/ghst/index.html"],
+["Infamous","https://inf41480.hydros.cl/"],
+["Velara","https://435678.kavellewatches.com/"],
+["Tung Tung","https://tungtung.avtosnoj.si/"],
+["Relic Network","https://bomboclat-wallahi.urpalestinian.tokeslaszlo.eu/"],
+["EDU Rocks","https://d1kdg4gl68lhf1.cloudfront.net/gxmes.html"],
+["Frogie's Arcade","https://gsyostos9t.ceifjskdj.fwh.is/"],
+["Ford","https://strawberry.avtosnoj.si"]
+
+];
+
+const sites=document.getElementById("sites");
+const screen=document.getElementById("screen");
+const welcome=document.getElementById("welcome");
+
+pages.forEach(([name,url])=>{
+
+sites.innerHTML += `
+<button class="site-btn"
+onclick="openSite('${url}')">
+${name}
+</button>
+`;
+
+});
+
+entry.oninput=()=>{
+
+if(entry.value==="Cryptex123"){
+
+gate.style.opacity="0";
+
+setTimeout(()=>{
+
+gate.style.display="none";
+main.style.display="flex";
+
+},400);
+
+}
+
+};
+
+function openSite(url){
+
+screen.src=url;
+welcome.style.display="none";
+
+}
+
+/* drag scroll */
+
+let down=false,start,left;
+
+sites.addEventListener("mousedown",e=>{
+
+down=true;
+start=e.pageX;
+left=sites.scrollLeft;
+
+});
+
+window.addEventListener("mouseup",()=>{
+
+down=false;
+
+});
+
+sites.addEventListener("mousemove",e=>{
+
+if(!down)return;
+
+sites.scrollLeft=
+left-(e.pageX-start);
+
+});
+
+sites.addEventListener("wheel",e=>{
+
+e.preventDefault();
+sites.scrollLeft+=e.deltaY;
+
+},{passive:false});
+
+</script>
+
+</body>
+</html>
