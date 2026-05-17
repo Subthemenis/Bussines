@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cybertech | Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --neon: #00ffe7;
+  --neon-hot: #ff2d78;
+  --bg: #020b12;
+  --panel: #030f1a;
+  --border: rgba(0,255,231,.2);
+  --text: #9ef7ee;
+  --text-dim: #3a7a80;
+  --grid: rgba(0,255,231,.04);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+@keyframes pulse-border {
+  0%,100%{ box-shadow: 0 0 8px rgba(0,255,231,.2); }
+  50%    { box-shadow: 0 0 22px rgba(0,255,231,.5); }
+}
+
+@keyframes boot-in {
+  from { opacity:0; transform:scale(1.03); }
+  to   { opacity:1; transform:scale(1); }
+}
+@keyframes corner-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+html, body {
+  width:100%; height:100%; overflow:hidden;
+  background:var(--bg); color:var(--text);
+  font-family:'Share Tech Mono', monospace;
+}
+
+
+
+/* ── GATE ── */
+#gate {
+  position:fixed; inset:0; z-index:2000;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:var(--bg); transition:opacity .6s;
+}
+
+
+
+.gate-eyebrow {
+  font-size:11px; letter-spacing:7px; color:var(--neon);
+  opacity:.7; margin-bottom:16px;
+}
+.gate-title {
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  font-size:clamp(48px,10vw,96px); letter-spacing:14px; color:#fff;
+  text-shadow: 0 0 30px rgba(0,255,231,.4);
+}
+.gate-sub {
+  font-size:11px; letter-spacing:4px; color:var(--text-dim);
+  margin-top:8px; margin-bottom:32px;
+}
+
+.input-wrap { position:relative; width:320px; }
+.input-wrap::after {
+  content:''; position:absolute; bottom:-2px; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,transparent,var(--neon),transparent);
+  animation:pulse-border 2s ease-in-out infinite;
+}
+#entry {
+  width:100%; padding:14px 18px;
+  background:rgba(0,255,231,.05); border:1px solid rgba(0,255,231,.3);
+  border-radius:4px; color:#fff; font-family:'Share Tech Mono';
+  font-size:18px; letter-spacing:7px; text-align:center; outline:none;
+  transition:.3s;
+}
+#entry::placeholder { color:var(--text-dim); letter-spacing:3px; font-size:12px; }
+#entry:focus {
+  border-color:var(--neon); background:rgba(0,255,231,.09);
+  box-shadow:0 0 28px rgba(0,255,231,.2), inset 0 0 16px rgba(0,255,231,.05);
+}
+
+.gate-status {
+  margin-top:18px; font-size:10px; letter-spacing:3px;
+  color:var(--text-dim); display:flex; align-items:center; gap:8px;
+}
+.status-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--neon); animation:blink 1.2s ease-in-out infinite;
+}
+
+/* ── MAIN UI ── */
+#main-ui {
+  display:none; flex-direction:column; height:100vh;
+  position:relative; z-index:1;
+  animation: boot-in .5s ease-out forwards;
+}
+
+/* NAV */
+nav {
+  display:flex; align-items:center; gap:10px;
+  padding:8px 12px;
+  background:rgba(2,11,18,.96);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0; position:relative; z-index:100;
+}
+nav::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,var(--neon) 30%,var(--neon-hot) 70%,transparent);
+  opacity:.5;
+}
+
+.brand {
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  font-size:17px; letter-spacing:5px; color:var(--neon);
+  text-shadow:0 0 18px rgba(0,255,231,.5);
+  flex-shrink:0;
+}
+.brand span {
+  display:block; font-size:7px; letter-spacing:2px;
+  color:var(--neon-hot); opacity:.8; margin-top:1px;
+}
+
+/* Scroll strip */
+.nav-scroll {
+  display:flex; gap:8px; overflow-x:auto; flex:1;
+  cursor:grab; padding:3px 6px; scroll-behavior:smooth; align-items:center;
+}
+.nav-scroll::-webkit-scrollbar { height:2px; }
+.nav-scroll::-webkit-scrollbar-thumb { background:rgba(0,255,231,.2); border-radius:2px; }
+
+/* Nav buttons */
+.nav-link {
+  height:34px; padding:0 14px; border-radius:3px;
+  border:1px solid rgba(0,255,231,.1);
+  background:transparent; color:var(--text-dim);
+  font-family:'Share Tech Mono'; font-size:11px;
+  letter-spacing:1px; white-space:nowrap; flex-shrink:0;
+  cursor:pointer; transition:all .18s;
+  position:relative; overflow:hidden; text-transform:uppercase;
+  display:flex; align-items:center; justify-content:center;
+}
+.nav-link::before {
+  content:''; position:absolute; top:0; left:-100%; width:100%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(0,255,231,.12),transparent);
+  transition:.4s;
+}
+.nav-link:hover::before { left:200%; }
+.nav-link:hover {
+  color:var(--neon); border-color:rgba(0,255,231,.5);
+  background:rgba(0,255,231,.06);
+  text-shadow:0 0 10px rgba(0,255,231,.6);
+  box-shadow:0 0 12px rgba(0,255,231,.15);
+  transform:translateY(-1px);
+}
+.nav-link:active { transform:scale(.96); }
+.nav-link.active {
+  color:var(--neon); border-color:rgba(0,255,231,.6);
+  background:rgba(0,255,231,.1);
+}
+
+/* Tool buttons */
+.controls { display:flex; gap:6px; flex-shrink:0; }
+.tool-btn {
+  height:36px; padding:0 14px; border-radius:3px;
+  border:1px solid rgba(0,255,231,.2); background:rgba(0,255,231,.04);
+  color:var(--text); font-family:'Share Tech Mono'; font-size:10px;
+  letter-spacing:1.5px; cursor:pointer; transition:all .18s; white-space:nowrap;
+}
+.tool-btn:hover {
+  border-color:var(--neon); color:var(--neon);
+  box-shadow:0 0 14px rgba(0,255,231,.2);
+  transform:translateY(-1px);
+}
+.tool-btn:active { transform:scale(.96); }
+.danger { color:#ff7676; border-color:rgba(255,45,120,.2); background:rgba(255,45,120,.04); }
+.danger:hover { color:var(--neon-hot); border-color:var(--neon-hot); box-shadow:0 0 14px rgba(255,45,120,.3); }
+
+#file-input { display:none; }
+
+/* VIEWPORT */
+#viewport { position:relative; flex:1; overflow:hidden; }
+
+/* corner brackets */
+.vp-corner { position:absolute; width:26px; height:26px; z-index:3; pointer-events:none; }
+.vp-corner::before, .vp-corner::after { content:''; position:absolute; background:rgba(0,255,231,.25); }
+.vp-corner::before { width:100%; height:1px; top:0; left:0; }
+.vp-corner::after  { width:1px; height:100%; top:0; left:0; }
+.vp-corner.tl { top:6px; left:6px; }
+.vp-corner.tr { top:6px; right:6px; transform:rotate(90deg); }
+.vp-corner.br { bottom:6px; right:6px; transform:rotate(180deg); }
+.vp-corner.bl { bottom:6px; left:6px; transform:rotate(270deg); }
+
+/* scanline overlay */
+#viewport::after {
+  content:''; position:absolute; inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);
+  pointer-events:none; z-index:10;
+}
+
+/* Idle screen */
+#bg-char {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  justify-content:center; align-items:center; gap:10px; z-index:1;
+}
+.idle-logo {
+  font-family:'Orbitron',sans-serif; font-size:32px; font-weight:900;
+  letter-spacing:8px; color:var(--neon); text-shadow:0 0 20px rgba(0,255,231,.4);
+}
+.idle-tag { font-size:10px; letter-spacing:5px; color:var(--text-dim); }
+
+iframe {
+  position:absolute; inset:0; width:100%; height:100%;
+  border:none; display:none;
+}
+</style>
+</head>
+<body>
+
+<!-- GATE -->
+<div id="gate">
+  <p class="gate-eyebrow">◈ SECURE ACCESS PORTAL ◈</p>
+  <h1 class="gate-title">CYBERTECH</h1>
+  <p class="gate-sub">COMMAND CENTER // v4.7</p>
+  <div class="input-wrap">
+    <input id="entry" placeholder="ENTER PASSCODE" autocomplete="off">
+  </div>
+
+</div>
+
+<!-- MAIN UI -->
+<div id="main-ui">
+  <nav>
+    <div class="brand">
+      CYBERTECH
+      <span>CMD // ONLINE</span>
+    </div>
+
+    <div class="nav-scroll">
+      <button class="nav-link" onclick="go('https://xylora.on.top.thenookfactory.com//', this)">Xylora</button>
+      <button class="nav-link" onclick="go('https://axischurch.ldeazevedo.com//', this)">Axis</button>
+      <button class="nav-link" onclick="go('https://larp.zinets.ca/onboarding/', this)">Cherri</button>
+      <button class="nav-link" onclick="go('https://calculus.homework.biology.geography.lecture.bigrocktechnologies.com/', this)">Otonic</button>
+      <button class="nav-link" onclick="go('https://jaydenmakesstuff.eleomedio-coach.hu/', this)">Vapor</button>
+      <button class="nav-link" onclick="go('https://hiandhello4.eleomedio-coach.hu/?/', this)">Void Network</button>
+      <button class="nav-link" onclick="go('https://inf41480.hydros.cl/', this)">Infamous</button>
+      <button class="nav-link" onclick="go('https://435678.kavellewatches.com/', this)">Velara</button>
+      <button class="nav-link" onclick="go('https://lsrelay-l.s3.amazonaws.com/index.html#/g', this)">Lucide</button>
+      <button class="nav-link" onclick="go('https://s3.amazonaws.com/ghst/index.html', this)">Ghost</button>
+      <button class="nav-link" onclick="go('https://tungtung.avtosnoj.si/', this)">Tung Tung</button>
+      <button class="nav-link" onclick="go('https://bomboclat-wallahi.urpalestinian.tokeslaszlo.eu/', this)">Relic Network</button>
+      <button class="nav-link" onclick="go('https://d1kdg4gl68lhf1.cloudfront.net/gxmes.html', this)">EDU Rocks</button>
+      <button class="nav-link" onclick="go('https://ixllearning-bengali89.firebaseapp.com/', this)">Noah's Butthole</button>
+      <button class="nav-link" onclick="go('https://gsyostos9t.ceifjskdj.fwh.is/', this)">Frogie's Arcade</button>
+      <button class="nav-link" onclick="go('https://strawberry.avtosnoj.si', this)">Ford</button>
+    </div>
+
+
+  </nav>
+
+  <div id="viewport">
+    <div class="vp-corner tl"></div>
+    <div class="vp-corner tr"></div>
+    <div class="vp-corner bl"></div>
+    <div class="vp-corner br"></div>
+
+    <div id="bg-char">
+      <div class="idle-logo">CT</div>
+      <div class="idle-tag">TERMINAL</div>
+    </div>
+
+    <iframe id="screen" allowfullscreen></iframe>
+  </div>
+</div>
+
+<script>
+const entry  = document.getElementById('entry');
+const gate   = document.getElementById('gate');
+const ui     = document.getElementById('main-ui');
+const bg     = document.getElementById('bg-char');
+const screen = document.getElementById('screen');
+
+entry.addEventListener('input', () => {
+  if (entry.value === 'Cybertech123') {
+    gate.style.opacity = '0';
+    setTimeout(() => {
+      gate.style.display = 'none';
+      ui.style.display = 'flex';
+    }, 600);
+  }
+});
+
+function go(url, btn) {
+  document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  screen.src = url;
+  screen.style.display = 'block';
+  bg.style.display = 'none';
+}
+
+
+
+/* Nav drag-scroll */
+const nav = document.querySelector('.nav-scroll');
+let down = false, startX, scrollLeft;
+nav.addEventListener('mousedown', e => {
+  down = true; nav.style.cursor = 'grabbing';
+  startX = e.pageX - nav.offsetLeft; scrollLeft = nav.scrollLeft;
+});
+window.addEventListener('mouseup', () => { down = false; nav.style.cursor = 'grab'; });
+nav.addEventListener('mouseleave', () => { down = false; });
+nav.addEventListener('mousemove', e => {
+  if (!down) return; e.preventDefault();
+  nav.scrollLeft = scrollLeft - (e.pageX - nav.offsetLeft - startX) * 1.5;
+});
+nav.addEventListener('wheel', e => { e.preventDefault(); nav.scrollLeft += e.deltaY; }, { passive: false });
+</script>
+</body>
+</html>
