@@ -521,11 +521,12 @@
 
         function go(url) {
             showLoading();
-            welcome.style.display = 'none';
-            screen.style.display = 'block';
-            screen.removeAttribute('srcdoc'); 
-            screen.src = url;
-            ui.classList.add('collapsed');
+              welcome.style.display = 'none';
+              screen.style.display = 'block';
+              screen.removeAttribute('srcdoc');
+              screen.src = url;
+              ui.classList.add('collapsed');
+              screen.onload = () => { loading.style.display = 'none'; };
         }
 
         function loadGames() {
